@@ -23,30 +23,76 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 import gradio_client
 import gradio_client.client
 import gradio_client.utils
+import urllib.parse
+import httpx
 
-gradio_client.utils.RAW_API_INFO_URL = "gradio_api/info?serialize=False"
-if hasattr(gradio_client.client, "utils"):
-    gradio_client.client.utils.RAW_API_INFO_URL = "gradio_api/info?serialize=False"
-
+# Patch JSON Schema boolean types issue in gradio_client
 _orig_schema_to_type = gradio_client.utils._json_schema_to_python_type
 gradio_client.utils._json_schema_to_python_type = lambda s, d: "Any" if isinstance(s, bool) else _orig_schema_to_type(s, d)
 
+# Custom robust implementation of Client._get_api_info
+def patched_get_api_info(self):
+    base_url = self.src.rstrip('/')
+    # Try the Gradio 5+ prefix first
+    api_info_url = f"{base_url}/gradio_api/info?serialize=False"
+    
+    print(f"DEBUG [patched_get_api_info]: Fetching from {api_info_url}", flush=True)
+    r = httpx.get(
+        api_info_url,
+        headers=self.headers,
+        cookies=self.cookies,
+        verify=self.ssl_verify,
+        **self.httpx_kwargs,
+    )
+    if r.status_code == 404 or not r.is_success:
+        # Fallback to the original endpoint if custom one fails
+        fallback_url = urllib.parse.urljoin(self.src, "info?serialize=False")
+        print(f"DEBUG [patched_get_api_info]: Custom path failed ({r.status_code}), trying fallback {fallback_url}", flush=True)
+        r = httpx.get(
+            fallback_url,
+            headers=self.headers,
+            cookies=self.cookies,
+            verify=self.ssl_verify,
+            **self.httpx_kwargs,
+        )
+    
+    if r.is_success:
+        info = r.json()
+        info["named_endpoints"] = {
+            a: e for a, e in info["named_endpoints"].items() if e.pop("show_api", True)
+        }
+        info["unnamed_endpoints"] = {
+            a: e for a, e in info["unnamed_endpoints"].items()
+        }
+        return info
+    
+    raise ValueError(f"Could not fetch api info for {self.src}: Status {r.status_code} - {r.text}")
+
+gradio_client.Client._get_api_info = patched_get_api_info
+
 HF_SPACE = "samarfuoad/modelProject"
-print("DEBUG: RAW_API_INFO_URL in utils:", gradio_client.utils.RAW_API_INFO_URL)
 try:
     hf_client = Client(HF_SPACE)
 except Exception as e:
-    print("DEBUG: Client initialization failed!")
-    print("DEBUG: Exception:", e)
-    print("DEBUG: RAW_API_INFO_URL on failure:", gradio_client.utils.RAW_API_INFO_URL)
-    import httpx
+    # Gather debug details and raise them so they show in the traceback logs
+    debug_msg = f"\n=== GRADIO CLIENT DEBUG DETAIL ===\nOriginal Error: {e}\n"
     try:
         r = httpx.get("https://samarfuoad-modelproject.hf.space/gradio_api/info?serialize=False")
-        print("DEBUG: Direct httpx fetch status:", r.status_code)
-        print("DEBUG: Direct httpx fetch text:", r.text[:500])
+        debug_msg += f"Direct HTTPX fetch /gradio_api/info status: {r.status_code}\n"
+        debug_msg += f"Direct HTTPX fetch /gradio_api/info text: {r.text[:500]}\n"
     except Exception as fetch_err:
-        print("DEBUG: Direct httpx fetch failed:", fetch_err)
-    raise e
+        debug_msg += f"Direct HTTPX fetch /gradio_api/info failed: {fetch_err}\n"
+    
+    try:
+        r2 = httpx.get("https://samarfuoad-modelproject.hf.space/info?serialize=False")
+        debug_msg += f"Direct HTTPX fetch /info status: {r2.status_code}\n"
+        debug_msg += f"Direct HTTPX fetch /info text: {r2.text[:500]}\n"
+    except Exception as fetch_err:
+        debug_msg += f"Direct HTTPX fetch /info failed: {fetch_err}\n"
+    
+    debug_msg += "===================================\n"
+    raise ValueError(debug_msg) from e
+
 
 # ************************************************************
 # دالة الاتصال بقاعدة البيانات
