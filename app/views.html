@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en" id="mainHtml" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDXD - Diagnosis Analysis View</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --sidebar-blue: #345e85; 
+            --accent-emerald: #10b981;
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #000000; 
+            --text-muted: #1e293b; 
+            --header-bg: #ffffff;
+            --border-color: #94a3b8; 
+        }
+
+        .dark-mode {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --header-bg: #1e293b;
+            --sidebar-blue: #1a365d;
+            --border-color: #475569;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-body); 
+            color: var(--text-main);
+            transition: all 0.3s ease;
+            direction: ltr !important; 
+        }
+
+        #sidebar { 
+            min-width: 260px; 
+            background: var(--sidebar-blue); 
+            color: #fff; 
+            height: 100vh; 
+            flex-shrink: 0;
+            transition: background 0.3s ease;
+        }
+
+        .sidebar-header { padding: 30px 10px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        
+        #sidebar ul li a { 
+            padding: 14px 25px; 
+            display: flex; 
+            align-items: center; 
+            color: #cbdcf0; 
+            text-decoration: none; 
+            font-size: 14px; 
+            transition: 0.3s; 
+        }
+
+        #sidebar ul li a:hover {
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+        }
+
+        #sidebar ul li.active a { 
+            background: rgba(255,255,255,0.1); 
+            color: #fff; 
+            border-left: 4px solid var(--accent-emerald); 
+        }
+
+        #sidebar ul li a i { margin-right: 12px; width: 20px; text-align: center; }
+
+        header { 
+            background: var(--header-bg); 
+            border-bottom: 1px solid var(--border-color); 
+            padding: 12px 30px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+
+        .header-tool-btn { 
+            width: 40px; 
+            height: 40px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 10px; 
+            color: var(--text-muted); 
+            cursor: pointer; 
+            transition: 0.3s; 
+            border: 1px solid var(--border-color); 
+        }
+
+        .header-tool-btn:hover { background-color: rgba(0,0,0,0.05); color: var(--accent-emerald); }
+
+        .navy-card-title { font-size: 0.85rem; font-weight: 900; color: #000000; text-transform: uppercase; letter-spacing: 0.05em; }
+        .dark-mode .navy-card-title { color: var(--accent-emerald); }
+
+        .fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .scan-overlay {
+            position: relative;
+            overflow: hidden;
+        }
+        .scan-overlay::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: var(--accent-emerald);
+            box-shadow: 0 0 12px var(--accent-emerald);
+            animation: scanning 3s linear infinite;
+        }
+        @keyframes scanning {
+            0% { top: 0%; }
+            50% { top: 100%; }
+            100% { top: 0%; }
+        }
+
+        @media print {
+            #sidebar, header, .no-print {
+                display: none !important;
+            }
+            body {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+            }
+            .fade-in {
+                transform: none !important;
+                animation: none !important;
+            }
+            main, .grid, .max-w-7xl {
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <nav id="sidebar">
+        <div class="sidebar-header">
+            <h2 class="text-2xl font-black italic">SDXD</h2>
+            <div class="my-4"><i class="fas fa-tooth fa-3x"></i></div>
+            <p class="text-[10px] font-bold opacity-70 uppercase tracking-widest lang-txt" data-en="Smart Dental System" data-ar="نظام الأسنان الذكي">Smart Dental System</p>
+        </div>
+        <ul class="mt-6">
+            <li><a href="sreaj.html"><i class="fas fa-home"></i> <span class="lang-txt" data-en="Home" data-ar="الرئيسية">Home</span></a></li>
+            <li><a href="newscan.html"><i class="fas fa-user-plus"></i> <span class="lang-txt" data-en="Patient" data-ar="المريض">Patient</span></a></li>            
+            <li class="active"><a href="dashboard.html"><i class="fas fa-folder-open"></i> <span class="lang-txt" data-en="Records" data-ar="السجلات">Records</span></a></li>
+            <li><a href="myanalysis.html"><i class="fas fa-chart-pie"></i> <span class="lang-txt" data-en="Analysis" data-ar="التحليلات">Analysis</span></a></li>
+            <li><a href="account.html"><i class="fas fa-user-circle"></i> <span class="lang-txt" data-en="Account" data-ar="الحساب">Account</span></a></li>
+            <li><a href="help.html"><i class="fas fa-question-circle"></i> <span class="lang-txt" data-en="Help" data-ar="المساعدة">Help</span></a></li>
+            <li><a href="loginpat.html"><i class="fas fa-sign-out text-red-400 hover:text-red-500 "></i><span class="text-red-400 hover:text-red-500 lang-txt" data-en="Log out" data-ar="تسجيل الخروج"> Log out</span></a></li>
+        </ul>
+    </nav>
+
+    <div class="flex-1 flex flex-col overflow-y-auto">
+        <header>
+            <div class="flex gap-3">
+                <div class="header-tool-btn" id="langBtn" title="Translate"><i class="fas fa-language text-xl"></i></div>
+                <div class="header-tool-btn" id="modeToggle" title="Toggle Mode">
+                    <i class="fas fa-moon text-lg" id="modeIcon"></i>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="text-right">
+                    <p class="text-xs font-black text-black dark:text-white" id="headerDocName"> </p>
+                    <p class="text-[10px] text-emerald-500 font-bold uppercase">Admin</p>
+                </div>
+                <img id="profile_photo" class="w-9 h-9 rounded-full border border-slate-200">
+            </div>
+        </header>
+
+        <div class="p-8 grid grid-cols-12 gap-6 fade-in w-full max-w-7xl mx-auto">
+            
+            <div class="col-span-12 lg:col-span-7 bg-[var(--bg-card)] rounded-xl shadow-sm border border-[var(--border-color)] p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-lg font-black uppercase tracking-tight text-black dark:text-white lang-txt" data-en="AI Segmentation & Analysis" data-ar="تحليل وتقسيم الذكاء الاصطناعي">AI Segmentation & Analysis</h2>
+                    <span class="bg-emerald-500/10 text-emerald-500 text-[10px] font-black px-2.5 py-1 rounded uppercase tracking-wider lang-txt" data-en="Analysis Complete" data-ar="اكتمل التحليل">Analysis Complete</span>
+                </div>
+
+                <div class="relative bg-slate-900 rounded-xl overflow-hidden flex items-center justify-center border border-slate-700 p-2 scan-overlay">
+                    <img id="viewScanImage" src="" class="w-full h-auto rounded-lg object-contain max-h-[400px]">
+                </div>
+            </div>
+
+            <div class="col-span-12 lg:col-span-5 space-y-6">
+                <div class="bg-[var(--bg-card)] rounded-xl shadow-sm border border-[var(--border-color)] p-6">
+                    <h3 class="navy-card-title mb-4 lang-txt" data-en="Active Patient Profile" data-ar="ملف المريض الحالي">Active Patient Profile</h3>
+                    
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center text-xs border-b border-[var(--border-color)] pb-2">
+                            <span class="text-gray-400 font-medium lang-txt" data-en="Name:" data-ar="الاسم:">Name:</span>
+                            <input type="text" id="viewPatientName" readonly class="font-black text-black dark:text-white bg-transparent text-right">
+                        </div>
+                        <div class="flex justify-between items-center text-xs border-b border-[var(--border-color)] pb-2">
+                            <span class="text-gray-400 font-medium lang-txt" data-en="Patient ID:" data-ar="رقم المريض:">Patient ID:</span>
+                            <input type="text" id="viewPatientId" readonly class="font-black text-black dark:text-white bg-transparent text-right">
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-gray-400 font-medium lang-txt" data-en="Analysis Date:" data-ar="تاريخ التحليل:">Analysis Date:</span>
+                            <span id="viewAnalysisDate" class="font-bold text-emerald-500"> </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-[var(--bg-card)] rounded-xl shadow-sm border border-[var(--border-color)] p-6">
+                    <h3 class="navy-card-title mb-4 text-blue-600 dark:text-blue-400 lang-txt" data-en="Diagnostic Findings" data-ar="نتائج التشخيص السريري">Diagnostic Findings</h3>
+                    
+                    <div class="space-y-4">
+
+                        <div class="p-3 bg-blue-500/5 border border-blue-500/20 rounded-lg">
+                            <h4 class="text-xs font-black text-blue-600 uppercase mb-1 lang-txt" data-en="AI Diagnostic Notes" data-ar="ملاحظات التشخيص الذكي"> AI Diagnosis Notes</h4> 
+                            <p id="viewAIDiagnosis" class="text-[11px] text-gray-500 whitespace-pre-wrap break-words leading-relaxed"></p> 
+                        </div>
+                        <div class="p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-lg mt-2">
+                            <h4 class="text-xs font-black text-emerald-600 uppercase mb-1 lang-txt" data-en="Confidence Score" data-ar=" درجة الثقة"> Confidence Score </h4>
+                            <p id="viewConfidence" class="text-[11px] text-gray-500"></p>
+                        </div>
+                          <div class="p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">
+                            <h4 class="text-xs font-black text-amber-600 uppercase mb-1 lang-txt" data-en=" AI Notes " data-ar=" ملاحظات الذكاء الإصطناعي "> AI Notes </h4>
+                            <textarea id="viewAiNotes" rows="5" class="w-full border rounded-md p-2 bg-transparent"></textarea>
+                        </div>
+                        <div class="p-3 bg-red-500/5 border border-red-500/20 rounded-lg">
+                            <h4 class="text-xs font-black text-red-600 uppercase mb-1 lang-txt" data-en=" Doctor's Notes " data-ar=" ملاحظات الطبيب "> Doctor's Notes </h4>
+                            <textarea id="viewDoctorNotes" rows="5" class="w-full border rounded-md p-2 bg-transparent"></textarea>
+                        </div>
+                        
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mt-6">
+                        <button id="printBtn" onclick="window.print()" class="no-print flex items-center justify-center gap-2 border border-[var(--border-color)] hover:bg-gray-50 dark:hover:bg-slate-800 font-bold py-2.5 rounded-md text-xs uppercase tracking-wider transition-all">
+                            <i class="fas fa-print text-gray-500"></i>
+                            <span class="lang-txt" data-en="Print Report" data-ar="طباعة التقرير">Print Report</span>
+                        </button>
+                        <button id="saveBtn" onclick="saveRecord()" class="no-print flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-black py-2.5 rounded-md text-xs uppercase tracking-wider transition-all shadow-sm">
+                            <i class="fas fa-save"></i>
+                            <span class="lang-txt" data-en="Save Record" data-ar="حفظ السجل">Save Record</span>
+                        </button>
+                    </div>
+                </div>
+
+                <a href="newscan.html" class="block w-full no-print">
+                    <button class="w-full bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white font-extrabold py-3 rounded-md text-xs uppercase tracking-widest shadow-sm transition-all active:scale-[0.98] lang-txt" data-en="← Back to Records Dashboard" data-ar="← العودة إلى لوحة السجلات">
+                        ← Back to Records Dashboard
+                    </button>
+                </a>
+            </div>
+
+        </div>
+    </div>
+<script src="/static/js/doctor.js"></script>
+    <script>
+        const modeToggle = document.getElementById('modeToggle');
+        const modeIcon = document.getElementById('modeIcon');
+        const langBtn = document.getElementById('langBtn');
+        const mainHtml = document.getElementById('mainHtml');
+        const body = document.body;
+
+        let currentTheme = localStorage.getItem('theme') || 'light';
+        let currentLang = localStorage.getItem('lang') || 'en';
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                body.classList.add('dark-mode');
+                if (modeIcon) {
+                    modeIcon.classList.remove('fa-moon');
+                    modeIcon.classList.add('fa-sun');
+                }
+            } else {
+                body.classList.remove('dark-mode');
+                if (modeIcon) {
+                    modeIcon.classList.remove('fa-sun');
+                    modeIcon.classList.add('fa-moon');
+                }
+            }
+            localStorage.setItem('theme', theme);
+        }
+
+        function updateLanguage(lang) {
+            mainHtml.setAttribute('lang', lang);
+            mainHtml.setAttribute('dir', 'ltr'); 
+
+            document.querySelectorAll('.lang-txt').forEach(el => {
+                const translatedText = el.getAttribute(`data-${lang}`);
+                if (translatedText) {
+                    el.innerText = translatedText;
+                }
+            });
+            localStorage.setItem('lang', lang);
+        }
+
+        applyTheme(currentTheme);
+        updateLanguage(currentLang);
+
+        modeToggle.addEventListener('click', () => {
+            currentTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
+            applyTheme(currentTheme);
+        });
+
+        langBtn.addEventListener('click', () => {
+            currentLang = (currentLang === 'en') ? 'ar' : 'en';
+            updateLanguage(currentLang);
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const currentScanId = sessionStorage.getItem('current_view_scan_id');
+            if (!currentScanId) {
+                document.getElementById('viewAIDiagnosis').innerText = 'No scan selected. Please analyze a scan first.';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/get-scan-details?scan_id=${currentScanId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const scan = data.scan;
+                    document.getElementById('viewPatientName').value = scan.patient_name || '---';
+                    document.getElementById('viewPatientId').value = (scan.patient_national_id || '---');
+                    document.getElementById('viewAnalysisDate').innerText = scan.scan_date || '---';
+                    document.getElementById('viewAIDiagnosis').innerText = scan.diagnosis_label || 'Not analyzed yet';
+                    document.getElementById('viewConfidence').innerText = scan.confidence_score ? scan.confidence_score + '%' : '---';
+                    document.getElementById('viewDoctorNotes').value = scan.notes || '';
+                    document.getElementById('viewAiNotes').value = scan.findings_json || 'No Ai notes.';
+                    if (scan.image_path) {
+                        document.getElementById('viewScanImage').src ="/upload/" + scan.image_path;
+                    }
+                } else {
+                    document.getElementById('viewAIDiagnosis').innerText = 'Scan not found.';
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                document.getElementById('viewAIDiagnosis').innerText = 'Error loading scan data.';
+            }
+        });
+
+        async function saveRecord() {
+            const currentScanId = sessionStorage.getItem('current_view_scan_id');
+
+            const body = {
+                scan_id: currentScanId,
+                patient_name: document.getElementById('viewPatientName').value,
+                patient_national_id: document.getElementById('viewPatientId').value,
+                doctor_notes: document.getElementById('viewDoctorNotes').value
+            };
+
+            const response = await fetch('/api/update-scan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert("Record updated successfully.");
+            } else {
+                alert("Failed to update.");
+            }
+        }
+    </script>
+</body>
+</html>

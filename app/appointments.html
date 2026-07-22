@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en" id="mainHtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDXD - Appointments</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --sidebar-blue: #345e85; 
+            --accent-emerald: #10b981;
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #000000; 
+            --text-muted: #334155; 
+            --header-bg: #ffffff;
+        }
+
+        .dark-mode {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #ffffff; 
+            --text-muted: #cbd5e1; 
+            --header-bg: #1e293b;
+            --sidebar-blue: #1a365d;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-body); 
+            color: var(--text-main);
+            direction: ltr !important; 
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Sidebar */
+        #sidebar { 
+            min-width: 260px; 
+            background: var(--sidebar-blue); 
+            color: #fff; 
+            height: 100vh; 
+            flex-shrink: 0;
+            transition: background 0.3s ease;
+        }
+
+        .sidebar-header { padding: 30px 10px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        
+        #sidebar ul li a { 
+            padding: 14px 25px; 
+            display: flex; 
+            align-items: center; 
+            color: #cbdcf0; 
+            text-decoration: none; 
+            font-size: 14px; 
+            transition: 0.3s; 
+            border-left: 4px solid transparent; 
+        }
+
+        #sidebar ul li a:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        #sidebar ul li.active a { background: rgba(255,255,255,0.1); color: #fff; border-left: 4px solid var(--accent-emerald); }
+        #sidebar ul li a i { margin-right: 12px; width: 20px; text-align: center; }
+
+        /* Header */
+        header { 
+            background: var(--header-bg); 
+            border-bottom: 1px solid #e2e8f0; 
+            padding: 12px 30px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+
+        .header-tool-btn { 
+            width: 40px; 
+            height: 40px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 10px; 
+            color: var(--text-muted); 
+            cursor: pointer; 
+            transition: 0.3s; 
+            border: 1px solid #e2e8f0; 
+        }
+
+        .dark-mode .header-tool-btn { border-color: #334155; }
+        .header-tool-btn:hover { background-color: rgba(0,0,0,0.05); color: var(--accent-emerald); }
+        .dark-mode .header-tool-btn:hover { background-color: rgba(255,255,255,0.05); }
+
+        /* Cards & Forms */
+        .card-box { 
+            background: var(--bg-card); 
+            border: 1px solid rgba(0,0,0,0.05); 
+            border-radius: 1rem; 
+            padding: 1.5rem; 
+            transition: background 0.3s ease;
+        }
+        .dark-mode .card-box { border-color: rgba(255,255,255,0.05); }
+
+        select, input[type="date"], input[type="time"] {
+            width: 100%;
+            padding: 0.6rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #94a3b8; 
+            background: rgba(0,0,0,0.02);
+            color: var(--text-main);
+            outline: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .dark-mode select, .dark-mode input { background: rgba(255,255,255,0.05); border-color: #475569; }
+        select:focus, input:focus { border-color: var(--accent-emerald); }
+
+        .fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .lang-txt { display: inline-block; }
+    </style>
+</head>
+<body>
+
+   <nav id="sidebar">
+    <div class="sidebar-header">
+        <h2 class="text-2xl font-black italic">SDXD</h2>
+        <div class="my-4"><i class="fas fa-tooth fa-3x"></i></div>
+        <p class="text-[10px] font-bold opacity-70 uppercase tracking-widest lang-txt" data-en="Patient Portal" data-ar="بوابة المريض">Patient Portal</p>
+    </div>
+    <ul class="mt-6">
+        <li><a href="patient-dashboard.html"><i class="fas fa-th-large"></i> <span class="lang-txt" data-en="Dashboard" data-ar="الرئيسية">Dashboard</span></a></li>
+        <li><a href="my-scans.html"><i class="fas fa-images"></i> <span class="lang-txt" data-en="My Scans" data-ar="أشعّتي">My Scans</span></a></li>
+        
+        <li class="active"><a href="#"><i class="fas fa-calendar-alt"></i> <span class="lang-txt" data-en="Appointments" data-ar="المواعيد">Appointments</span></a></li>
+        
+        <li><a href="help_pat.html"><i class="fas fa-question-circle"></i> <span class="lang-txt" data-en="Help Support" data-ar="الدعم والمساعدة">Help Support</span></a></li>
+        
+        <li class="mt-20">
+            <button id="logoutBtn" class="w-full text-left px-6 py-3.5 text-red-400 hover:text-red-500 transition-all flex items-center gap-3 font-bold text-sm">
+                <i class="fas fa-sign-out-alt"></i> 
+                <span class="lang-txt" data-en="Logout" data-ar="تسجيل الخروج">Logout</span>
+            </button>
+        </li>
+    </ul>
+</nav>
+
+    <div class="flex-1 flex flex-col overflow-y-auto">
+        
+        <header>
+            <div class="flex gap-3">
+                <div class="header-tool-btn" id="langBtn" title="Translate"><i class="fas fa-language text-xl"></i></div>
+                <div class="header-tool-btn" id="modeToggle" title="Toggle Mode">
+                    <i class="fas fa-moon text-lg" id="modeIcon"></i>
+                </div>
+            </div>
+        </header>
+
+        <div class="p-8 max-w-6xl mx-auto w-full fade-in space-y-8">
+            <div>
+                <h1 class="text-3xl font-extrabold uppercase tracking-tight lang-txt" data-en="Manage Appointments" data-ar="إدارة المواعيد" style="color: var(--text-main);">Manage Appointments</h1>
+                <p class="text-sm mt-1 font-semibold lang-txt" data-en="Book new visits or keep track of your dental treatment history." data-ar="احجز زيارات جديدة أو تابع تاريخ مواعيدك وجلسات العلاج السابقة." style="color: var(--text-muted);">Book new visits or keep track of your dental treatment history.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <div class="card-box h-fit">
+                    <h3 class="text-sm font-extrabold uppercase tracking-wider border-b pb-3 mb-4 flex items-center gap-2">
+                        <i class="fas fa-calendar-plus text-emerald-500"></i>
+                        <span class="lang-txt" data-en="Book a New Visit" data-ar="حجز موعد جديد">Book a New Visit</span>
+                    </h3>
+                    <form class="space-y-4 text-left" id="bookingForm">
+
+    <div>
+        <label class="block text-[10px] font-extrabold uppercase mb-1 opacity-70">Select Doctor</label>
+        <select id="doctorSelect" required>
+            <option value="">Choose doctor...</option>
+        </select>
+    </div>
+
+    <div>
+        <label class="block text-[10px] font-extrabold uppercase mb-1 opacity-70">Preferred Date</label>
+        <input type="date" id="dateInput" required>
+    </div>
+
+    <div>
+        <label class="block text-[10px] font-extrabold uppercase mb-1 opacity-70">Preferred Time</label>
+        <input type="time" id="timeInput" required>
+    </div>
+
+    <button type="submit"
+        class="w-full py-2.5 rounded-lg text-white font-bold text-xs uppercase"
+        style="background-color: var(--accent-emerald);">
+        Submit Booking Request
+    </button>
+</form>
+                </div>
+
+                <div class="lg:col-span-2 space-y-6">
+                    
+                    <div class="card-box border-l-4 border-l-emerald-500">
+                        <h3 class="text-xs font-extrabold uppercase tracking-widest text-emerald-500 mb-3 flex items-center gap-2">
+                            <i class="fas fa-clock"></i>
+                            <span class="lang-txt" data-en="Upcoming Confirmed Visit" data-ar="الزيارة القادمة المؤكدة">Upcoming Confirmed Visit</span>
+                        </h3>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                                <h4 id="upcomingDate" class="text-lg font-extrabold"></h4>
+<p id="upcomingDoctor" class="text-xs font-bold opacity-80 mt-1"></p>
+  </div>
+                            <div class="flex gap-2">
+                                <button id="cancelAppointmentBtn" class="px-3 py-1.5 bg-red-50 dark:bg-red-500/10 hover:bg-red-500 hover:text-white dark:hover:bg-red-500 text-red-500 font-bold text-[11px] rounded transition-all lang-txt" data-en="Cancel" data-ar="إلغاء الموعد"></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-box space-y-4">
+                        <h3 class="text-sm font-extrabold uppercase tracking-wider border-b pb-2" style="color: var(--text-main); border-color: rgba(0,0,0,0.1);">
+                            <span class="lang-txt" data-en="Past Visits History" data-ar="سجل الزيارات السابقة">Past Visits History</span>
+                        </h3>
+                        
+                        <div class="overflow-x-auto">
+    <div class="w-full text-xs font-bold">
+
+        <!-- Header -->
+        <div class="grid grid-cols-3 gap-2 border-b pb-3 text-[10px] uppercase opacity-60">
+            <div class="py-2 lang-txt" data-en="Date & Time" data-ar="التاريخ والوقت">Date & Time</div>
+            <div class="py-2 lang-txt" data-en="Doctor" data-ar="الطبيب">Doctor</div>
+            <div class="py-2 text-center lang-txt" data-en="Status" data-ar="الحالة">Status</div>
+        </div>
+
+        <!-- Rows -->
+        <div id="historyTable" class="divide-y divide-gray-200/20"></div>
+
+    </div>
+</div>
+</div>
+
+
+                    <div class="card-box space-y-4">
+                        <h3 class="text-sm font-extrabold uppercase tracking-wider border-b pb-2" style="color: var(--text-main); border-color: rgba(0,0,0,0.1);">
+                            <span class="lang-txt" data-en=" Appointment booking history " data-ar=" سجل حجز المواعيد "> Appointment booking history </span>
+                        </h3>
+                        
+                        <div class="overflow-x-auto">
+    <div class="w-full text-xs font-bold">
+
+        <!-- Header -->
+        <div class="grid grid-cols-4 gap-2 border-b pb-3 text-[10px] uppercase opacity-60">
+            <div class="py-2 lang-txt" data-en="Date & Time" data-ar="التاريخ والوقت">Date & Time</div>
+            <div class="py-2 lang-txt" data-en="Doctor" data-ar="الطبيب">Doctor</div>
+            <div class="py-2 text-center lang-txt" data-en="Status" data-ar="الحالة">Status</div>
+            <div class="py-2 text-center lang-txt" data-en="Delete" data-ar=" إلغاء ">Delete</div>
+        </div>
+
+        <!-- Rows -->
+        <div id="historyTable1" class="divide-y divide-gray-200/20"></div>
+
+    </div>
+</div>
+</div>
+
+            </div>
+        </div>
+    </div>
+
+<script>
+
+let fullHistory = [];
+let fullHistory1 = [];
+let showAllHistory = false;
+let showAllHistory1 = false;
+
+const API = "http://127.0.0.1:5000";
+
+/* =========================
+   TOKEN
+========================= */
+function getToken() {
+    return localStorage.getItem("token");
+}
+
+/* =========================
+   LOAD DOCTORS
+========================= */
+async function cancelAppointment(id) {
+    try {
+        const res = await fetch(`${API}/api/deletedd/${id}`, {
+            method: "PUT",
+            headers: {
+                "Authorization": "Bearer " + getToken()
+            }
+        });
+
+        const data = await res.json();
+
+        alert(data.message || "Cancelled");
+
+        if (data.success) {
+            loadAppointments();
+        }
+    } catch (err) {
+        console.error("Cancel error:", err);
+    }
+}
+
+async function loadDoctors() {
+    try {
+        const res = await fetch(`${API}/api/doctors`);
+        const data = await res.json();
+
+        if (!data.success) return;
+
+        const select = document.getElementById("doctorSelect");
+
+        data.doctors.forEach(doc => {
+            const option = document.createElement("option");
+            option.value = doc.idDoctor;
+            option.textContent = `Dr. ${doc.first_name} ${doc.last_name}`;
+            select.appendChild(option);
+        });
+
+    } catch (err) {
+        console.error("Doctors load error:", err);
+    }
+}
+
+/* =========================
+   RENDER HISTORY (IMPORTANT)
+========================= */
+function renderHistory() {
+    const table = document.getElementById("historyTable");
+    table.innerHTML = "";
+
+    if (!fullHistory || fullHistory.length === 0) {
+        table.innerHTML = `<div class="py-4 text-center opacity-50">No history yet</div>`;
+        return;
+    }
+
+    // إذا مش مفعل View All → اعرض آخر 3 زيارات فقط
+    const dataToShow = showAllHistory ? fullHistory : fullHistory.slice(0, 3);
+
+    dataToShow.forEach(item => {
+
+        let statusColor = "";
+        let statusBg = "";
+
+        const status = (item.status || "").toLowerCase();
+
+        if (status.includes("done") || status.includes("completed")) {
+            statusColor = "text-green-600";
+            statusBg = "bg-green-100 dark:bg-green-500/10";
+        } else if (status.includes("pending")) {
+            statusColor = "text-yellow-600";
+            statusBg = "bg-yellow-100 dark:bg-yellow-500/10";
+        } else if (status.includes("cancel")) {
+            statusColor = "text-red-600";
+            statusBg = "bg-red-100 dark:bg-red-500/10";
+        } else {
+            statusColor = "text-gray-600";
+            statusBg = "bg-gray-100 dark:bg-gray-500/10";
+        }
+
+        table.innerHTML += `
+            <div class="grid grid-cols-3 gap-2 py-3 items-center hover:bg-black/5 dark:hover:bg-white/5 transition rounded-md px-2">
+
+                <div class="font-medium">
+                    ${item.created_at  || ""} <br>
+                    <span class="text-[10px] opacity-60">${item.preferred_time || ""}</span>
+                </div>
+
+                <div class="font-semibold">
+                    Dr. ${item.first_name || ""} ${item.last_name || ""}
+                </div>
+
+                <div class="text-center">
+                    <span class="px-2 py-1 rounded-full text-[10px] font-bold ${statusColor} ${statusBg}">
+                        ${item.status || "-"}
+                    </span>
+                </div>
+
+            </div>
+        `;
+        
+    });
+
+    
+    // زر View All / Show Less
+    const btnId = "toggleHistoryBtn";
+    let btn = document.getElementById(btnId);
+
+    if (!btn && fullHistory.length > 3) {
+        btn = document.createElement("button");
+        btn.id = btnId;
+        btn.className = "mt-3 text-xs font-bold text-emerald-600 hover:underline";
+        document.getElementById("historyTable").after(btn);
+    }
+
+    if (btn) {
+        if (fullHistory.length <= 3) {
+            btn.remove();
+        } else {
+            btn.innerText = showAllHistory ? "Show Less" : "View All";
+
+            btn.onclick = () => {
+                showAllHistory = !showAllHistory;
+                renderHistory();
+            };
+        }
+    }
+}
+
+function renderHistory1() {
+const table1 = document.getElementById("historyTable1");
+    table1.innerHTML = "";
+
+    if (!fullHistory1 || fullHistory1.length === 0) {
+        table1.innerHTML = `<div class="py-4 text-center opacity-50">No history yet</div>`;
+        return;
+    }
+
+    // إذا مش مفعل View All → اعرض آخر زيارة فقط
+    const dataToShow = showAllHistory1 ? fullHistory1 : fullHistory1.slice(0, 1);
+
+    dataToShow.forEach(item => {
+
+        let statusColor = "";
+        let statusBg = "";
+
+        const status = (item.status || "").toLowerCase();
+
+        if (status.includes("done") || status.includes("completed")) {
+            statusColor = "text-green-600";
+            statusBg = "bg-green-100 dark:bg-green-500/10";
+        } else if (status.includes("pending")) {
+            statusColor = "text-yellow-600";
+            statusBg = "bg-yellow-100 dark:bg-yellow-500/10";
+        } else if (status.includes("cancel")) {
+            statusColor = "text-red-600";
+            statusBg = "bg-red-100 dark:bg-red-500/10";
+        } else {
+            statusColor = "text-gray-600";
+            statusBg = "bg-gray-100 dark:bg-gray-500/10";
+        }
+
+        table1.innerHTML += `
+    <div class="grid grid-cols-4 gap-2 py-3 items-center hover:bg-black/5 dark:hover:bg-white/5 transition rounded-md px-2">
+
+        <div class="font-medium">
+            ${item.preferred_date || ""} <br>
+            <span class="text-[10px] opacity-60">${item.preferred_time || ""}</span>
+        </div>
+
+        <div class="font-semibold">
+            Dr. ${item.first_name || ""} ${item.last_name || ""}
+        </div>
+
+        <div class="text-center">
+            <span class="px-2 py-1 rounded-full text-[10px] font-bold ${statusColor} ${statusBg}">
+                ${item.status || "-"}
+            </span>
+        </div>
+
+        <div class="text-center">
+            <button
+                onclick="cancelAppointment(${item.appointment_id})"
+                class="text-[10px] px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                Cancel
+            </button>
+        </div>
+
+    </div>
+`;
+        
+    });
+
+    
+    // زر View All / Show Less
+    const btnId1 = "toggleHistoryBtn1";
+    let btn1 = document.getElementById(btnId1);
+
+    if (!btn1 && fullHistory1.length > 1) {
+        btn1 = document.createElement("button");
+        btn1.id = btnId1;
+        btn1.className = "mt-3 text-xs font-bold text-emerald-600 hover:underline";
+        document.getElementById("historyTable1").after(btn1);
+    }
+
+    if (btn1) {
+        if (fullHistory1.length <= 1) {
+            btn1.remove();
+        } else {
+            btn1.innerText = showAllHistory1 ? "Show Less" : "View All";
+
+            btn1.onclick = () => {
+                showAllHistory1 = !showAllHistory1;
+                renderHistory1();
+            };
+        }
+    }
+}
+
+/* =========================
+   LOAD APPOINTMENTS
+========================= */
+async function loadAppointments() {
+    try {
+        const res = await fetch(`${API}/api/appointments/my`, {
+            headers: {
+                "Authorization": "Bearer " + getToken()
+            }
+        });
+
+        const data = await res.json();
+
+        if (!data.success) {
+            console.error("API Error:", data);
+            return;
+        }
+
+        /* ===== UPCOMING ===== */
+        if (data.upcoming) {
+            document.getElementById("upcomingDate").innerText =
+                `${data.upcoming.preferred_date} - ${data.upcoming.preferred_time}`;
+
+            document.getElementById("upcomingDoctor").innerText =
+                `${data.upcoming.first_name} ${data.upcoming.last_name}`;
+
+            document.getElementById("cancelAppointmentBtn").onclick = async () => {
+                await fetch(`${API}/api/appointments/cancel/${data.upcoming.appointment_id}`, {
+                    method: "PUT",
+                    headers: {
+                        "Authorization": "Bearer " + getToken()
+                    }
+                });
+
+                loadAppointments();
+            };
+
+        } else {
+            document.getElementById("upcomingDate").innerText = "No upcoming appointment";
+            document.getElementById("upcomingDoctor").innerText = "";
+        }
+
+        /* ===== HISTORY ===== */
+        fullHistory = data.history || [];
+        renderHistory();
+
+        fullHistory1 = data.booking || [];
+        renderHistory1();
+
+    } catch (err) {
+        console.error("Load error:", err);
+    }
+}
+
+/* =========================
+   BOOK APPOINTMENT
+========================= */
+document.getElementById("bookingForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const doctor_id = document.getElementById("doctorSelect").value;
+    const preferred_date = document.getElementById("dateInput").value;
+    const preferred_time = document.getElementById("timeInput").value;
+
+    if (!doctor_id || !preferred_date || !preferred_time) {
+        alert("Please fill all fields");
+        return;
+    }
+
+    if (preferred_time < "08:00" || preferred_time > "14:00") {
+        alert("Clinic working hours are from 08:00 AM to 02:00 PM");
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API}/api/appointments/book`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + getToken()
+            },
+            body: JSON.stringify({
+                doctor_id,
+                preferred_date,
+                preferred_time
+            })
+        });
+
+        const data = await res.json();
+
+        alert(data.message);
+
+        if (data.success) {
+            loadAppointments();
+        }
+
+    } catch (err) {
+        console.error("Booking error:", err);
+    }
+});
+
+/* =========================
+   INIT
+========================= */
+document.addEventListener("DOMContentLoaded", () => {
+    loadDoctors();
+    loadAppointments();
+
+    const dateInput = document.getElementById("dateInput");
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const yyyy = tomorrow.getFullYear();
+    const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+    const dd = String(tomorrow.getDate()).padStart(2, '0');
+
+    dateInput.min = `${yyyy}-${mm}-${dd}`;
+});
+
+/* =========================
+   THEME + LANG + LOGOUT
+========================= */
+const modeToggle = document.getElementById('modeToggle');
+const modeIcon = document.getElementById('modeIcon');
+const langBtn = document.getElementById('langBtn');
+const body = document.body;
+
+function applyTheme(theme) {
+    if (theme === 'dark') {
+        body.classList.add('dark-mode');
+        modeIcon?.classList.replace('fa-moon', 'fa-sun');
+    } else {
+        body.classList.remove('dark-mode');
+        modeIcon?.classList.replace('fa-sun', 'fa-moon');
+    }
+}
+
+function applyLanguage(lang) {
+    document.querySelectorAll('.lang-txt').forEach(el => {
+        el.innerText = el.getAttribute(`data-${lang}`);
+    });
+
+    body.style.direction = (lang === 'ar') ? 'rtl' : 'ltr';
+}
+
+let currentTheme = localStorage.getItem('theme') || 'light';
+let currentLang = localStorage.getItem('lang') || 'en';
+
+applyTheme(currentTheme);
+applyLanguage(currentLang);
+
+modeToggle?.addEventListener('click', () => {
+    currentTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
+    localStorage.setItem('theme', currentTheme);
+    applyTheme(currentTheme);
+});
+
+langBtn?.addEventListener('click', () => {
+    currentLang = currentLang === 'en' ? 'ar' : 'en';
+    localStorage.setItem('lang', currentLang);
+    applyLanguage(currentLang);
+});
+
+document.getElementById('logoutBtn')?.addEventListener('click', () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.href = "loginpat.html";
+});
+</script>
+</body>
+</html>

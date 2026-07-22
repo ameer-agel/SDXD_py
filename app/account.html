@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en" id="mainHtml" dir="ltr" class="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDXD - Doctor Profile & Settings</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        // تكوين TailWind لتطبيق الوضع الداكن عبر الـ class dark من وسم html
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            sidebar: '#345e85',
+                            darkSidebar: '#1a365d',
+                            bgDark: '#0f172a',
+                            cardDark: '#1e293b'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            direction: ltr !important; /* فرض اتجاه اليسار لواجهة النظام */
+        }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ثبات حواف القائمة الجانبية والأيقونات جهة اليسار للتوافق مع ltr */
+        #sidebar ul li.active a { border-left: 4px solid #10b981; border-right: none; }
+        #sidebar ul li a i { margin-right: 12px; margin-left: 0; }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-navy-bgDark text-black dark:text-slate-100 flex h-screen overflow-hidden transition-colors duration-300 relative">
+
+    <!-- إشعار حفظ الإعدادات (Toast) -->
+    <div id="saveToast" class="fixed top-5 right-5 bg-emerald-500 text-white px-6 py-3 rounded-lg shadow-xl flex items-center space-x-3 z-50 transform translate-y-[-20px] opacity-0 pointer-events-none transition-all duration-300">
+        <i class="fas fa-check-circle text-lg"></i>
+        <span id="toastText" class="font-bold text-sm"></span>
+    </div>
+
+    <!-- نافذة تأكيد إلغاء التعديلات المنبثقة -->
+    <div id="discardModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300 opacity-0 pointer-events-none">
+        <div class="bg-white dark:bg-navy-cardDark p-6 rounded-xl shadow-2xl border border-slate-400 dark:border-slate-800 w-[380px] text-center transition-colors duration-300">
+            <div class="text-amber-500 text-4xl mb-3">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h4 class="text-base font-black text-black dark:text-white mb-4 lang-txt" data-en="Are you sure you want to discard changes?" data-ar="هل أنت متأكد من إلغاء التعديلات؟">Are you sure you want to discard changes?</h4>
+            <div class="flex justify-center space-x-3">
+                <button id="cancelDiscardBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-900 font-bold px-5 py-2 rounded-md text-xs uppercase tracking-wider transition-all lang-txt" data-en="Cancel" data-ar="تراجع">Cancel</button>
+                <button id="confirmDiscardBtn" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-5 py-2 rounded-md text-xs uppercase tracking-wider transition-all lang-txt" data-en="Confirm" data-ar="تأكيد">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة تغيير كلمة المرور المنبثقة -->
+    <div id="passwordModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300 opacity-0 pointer-events-none">
+        <div class="bg-white dark:bg-navy-cardDark p-8 rounded-xl shadow-2xl border border-slate-400 dark:border-slate-800 w-[400px] relative transition-colors duration-300">
+            <button id="closeModal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+            <h3 class="text-lg font-black text-black dark:text-emerald-400 uppercase tracking-tight mb-6 lang-txt" data-en="Change Password" data-ar="تغيير كلمة المرور">Change Password</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-black text-black dark:text-slate-300 mb-1.5 uppercase lang-txt" data-en="Current Password:" data-ar="كلمة المرور الحالية:">Current Password:</label>
+                    <div class="relative flex items-center">
+                        <input id="currentPassword" type="password" autocomplete="new-password" placeholder="Enter current password" data-placeholder-en="Enter current password" data-placeholder-ar="أدخل كلمة المرور الحالية" class="lang-txt w-full bg-slate-100 dark:bg-navy-bgDark border border-slate-400 dark:border-slate-700 rounded-md p-2.5 pr-10 text-sm text-black dark:text-white focus:outline-none focus:border-emerald-500 transition-colors">
+                        <button type="button" class="toggle-password absolute right-3 text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 focus:outline-none">
+                            <i class="far fa-eye text-base"></i>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-black dark:text-slate-300 mb-1.5 uppercase lang-txt" data-en="New Password:" data-ar="كلمة المرور الجديدة:">New Password:</label>
+                    <div class="relative flex items-center">
+                        <input id="newPassword" type="password" autocomplete="new-password" placeholder="Enter new password" data-placeholder-en="Enter new password" data-placeholder-ar="أدخل كلمة المرور الجديدة" class="lang-txt w-full bg-slate-100 dark:bg-navy-bgDark border border-slate-400 dark:border-slate-700 rounded-md p-2.5 pr-10 text-sm text-black dark:text-white focus:outline-none focus:border-emerald-500 transition-colors">
+                        <button type="button" class="toggle-password absolute right-3 text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 focus:outline-none">
+                            <i class="far fa-eye text-base"></i>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-black dark:text-slate-300 mb-1.5 uppercase lang-txt" data-en="Confirm New Password:" data-ar="تأكيد كلمة المرور الجديدة:">Confirm New Password:</label>
+                    <div class="relative flex items-center">
+                        <input id="confirmPassword" type="password" autocomplete="new-password" placeholder="Confirm new password" data-placeholder-en="Confirm new password" data-placeholder-ar="تأكيد كلمة المرور الجديدة" class="lang-txt w-full bg-slate-100 dark:bg-navy-bgDark border border-slate-400 dark:border-slate-700 rounded-md p-2.5 pr-10 text-sm text-black dark:text-white focus:outline-none focus:border-emerald-500 transition-colors">
+                        <button type="button" class="toggle-password absolute right-3 text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 focus:outline-none">
+                            <i class="far fa-eye text-base"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 flex justify-center">
+                <button id="confirmPasswordBtn" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black px-12 py-3 rounded-md text-sm uppercase tracking-wider shadow-md transition-all active:scale-[0.98] lang-txt" data-en="Confirm" data-ar="تأكيد">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <nav id="sidebar" class="w-[260px] bg-navy-sidebar dark:bg-navy-darkSidebar text-white flex flex-col flex-shrink-0 h-screen sticky top-0 justify-between transition-colors duration-300">
+        <div>
+            <div class="p-[30px_10px] text-center border-b border-white/10">
+                <h2 class="text-2xl font-black italic uppercase">SDXD</h2>
+                <div class="my-4 text-white flex justify-center">
+                    <i class="fas fa-tooth text-5xl"></i>
+                </div>
+                <p class="text-[10px] font-bold opacity-70 uppercase tracking-widest lang-txt" data-en="Smart Dental System" data-ar="نظام الأسنان الذكي">Smart Dental System</p>
+            </div>
+
+            <ul class="mt-6 space-y-0">
+                <li>
+                    <a href="sreaj.html" class="flex items-center px-[25px] py-[14px] text-[14px] text-[#cbdcf0] hover:text-white hover:bg-white/10 transition-all">
+                        <i class="fas fa-home w-5 text-center"></i> <span class="lang-txt" data-en="Home" data-ar="الرئيسية">Home</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="newscan.html" class="flex items-center px-[25px] py-[14px] text-[14px] text-[#cbdcf0] hover:text-white hover:bg-white/10 transition-all">
+                        <i class="fas fa-user-plus w-5 text-center"></i> <span class="lang-txt" data-en="Patient" data-ar="المريض">Patient</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="dashboard.html" class="flex items-center px-[25px] py-[14px] text-[14px] text-[#cbdcf0] hover:text-white hover:bg-white/10 transition-all">
+                        <i class="fas fa-folder-open w-5 text-center"></i> <span class="lang-txt" data-en="Records" data-ar="السجلات">Records</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="myanalysis.html" class="flex items-center px-[25px] py-[14px] text-[14px] text-[#cbdcf0] hover:text-white hover:bg-white/10 transition-all">
+                        <i class="fas fa-chart-pie w-5 text-center"></i> <span class="lang-txt" data-en="Analysis" data-ar="التحليلات">Analysis</span>
+                    </a>
+                </li>
+                <li class="active">
+                    <a href="account.html" class="flex items-center px-[25px] py-[14px] text-[14px] text-white bg-white/10 transition-all">
+                        <i class="fas fa-user-circle w-5 text-center"></i> <span class="lang-txt" data-en="Account" data-ar="الحساب">Account</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="help.html" class="flex items-center px-[25px] py-[14px] text-[14px] text-[#cbdcf0] hover:text-white hover:bg-white/10 transition-all">
+                        <i class="fas fa-question-circle w-5 text-center"></i> <span class="lang-txt" data-en="Help" data-ar="المساعدة">Help</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="loginpat.html" class="flex items-center px-[25px] py-[14px] text-[14px] text-red-400 hover:text-red-500  transition-all">
+                        <i class="fas fa-sign-out text-red-400 hover:text-red-500 r"></i> <span class="lang-txt" data-en="Log out" data-ar="تسجيل الخروج"> Log out</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="flex-1 flex flex-col overflow-y-auto">
+        <header class="bg-white dark:bg-slate-900 border-b border-slate-400 dark:border-slate-800 p-[12px_30px] flex justify-between items-center transition-colors duration-300 sticky top-0 z-40">
+            <div class="flex gap-3">
+                <div class="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-400 dark:border-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-all" id="langBtn" title="Translate"><i class="fas fa-language text-xl"></i></div>
+                <div class="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-400 dark:border-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-all" id="modeToggle" title="Toggle Mode">
+                    <i class="fas fa-moon text-lg" id="modeIcon"></i>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="text-right">
+                    <p class="text-xs font-black text-black dark:text-white" id="headerDocName"> </p>
+                    <p class="text-[10px] text-emerald-500 font-bold uppercase">Admin</p>
+                </div>
+                <img id="profile_photo" class="w-9 h-9 rounded-full border border-slate-200">
+            </div>
+        </header>
+
+        <div class="p-8 grid grid-cols-12 gap-6 fade-in">
+            
+            <div class="col-span-12 lg:col-span-4 space-y-6">
+                <div class="bg-white dark:bg-navy-cardDark rounded-xl shadow-sm border border-slate-400 dark:border-slate-800 p-6 text-center relative overflow-hidden transition-colors duration-300">
+                    <div class="absolute top-0 left-0 w-full h-2 bg-emerald-500"></div>
+                    <div class="relative inline-block mt-4">
+    <img id="profileImg"
+         src="https://ui-avatars.com/api/?name=Admin&background=345e85&color=fff&size=128"
+         class="w-24 h-24 rounded-full mx-auto border-4 border-emerald-500 shadow-sm cursor-pointer">
+
+    <span class="absolute bottom-1 right-2 bg-emerald-500 border-2 border-white dark:border-slate-800 w-4 h-4 rounded-full"></span>
+
+    <input type="file" id="profileInput" accept="image/*" class="hidden">
+</div>
+                    <h2 id="doctorNameCard" class="text-lg font-black text-black dark:text-white mt-4 lang-txt"></h2>
+                    <p id="Radiologist" class="text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider lang-txt" data-en="Consultant Maxillofacial Radiologist" data-ar="استشاري أشعة الفم والوجه والفكين"></p>
+                    <div class="mt-4 pt-4 border-t border-slate-400 dark:border-slate-700 flex justify-around text-center">
+                        <div>
+                            <p class="text-xs font-black text-black dark:text-slate-400 uppercase lang-txt" data-en="License" data-ar="الترخيص">License</p>
+                            <p id="license_number" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-1"> </p>
+                        </div>
+                        <div class="border-l border-slate-400 dark:border-slate-700 h-8"></div>
+                        <div>
+                            <p class="text-xs font-black text-black dark:text-slate-400 uppercase lang-txt" data-en="Joined" data-ar="انضم منذ">Joined</p>
+                            <p id="created_at" class="text-xs font-bold text-gray-800 dark:text-slate-200 mt-1 lang-txt" data-en="Oct 2024" data-ar="أكتوبر 2024">Oct 2024</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-navy-cardDark rounded-xl shadow-sm border border-slate-400 dark:border-slate-800 p-6 space-y-4 transition-colors duration-300">
+                    <h3 class="text-xs font-900 text-black dark:text-emerald-400 uppercase tracking-wider mb-2 lang-txt" data-en="Clinical Metrics" data-ar="المؤشرات السريرية">Clinical Metrics</h3>
+                    
+                    <div class="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg flex items-center justify-between border border-slate-400 dark:border-slate-700/50 transition-colors">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-md"><i class="fas fa-procedures"></i></div>
+                            <span class="text-xs font-black text-black dark:text-slate-300 uppercase lang-txt" data-en="Total Scans" data-ar="إجمالي الفحوصات">Total Scans</span>
+                        </div>
+                        <span id="total_scans" class="text-sm font-black text-black dark:text-white"> </span>
+                    </div>
+
+                    <div class="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg flex items-center justify-between border border-slate-400 dark:border-slate-700/50 transition-colors">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-md"><i class="fas fa-bullseye"></i></div>
+                            <span class="text-xs font-black text-black dark:text-slate-300 uppercase lang-txt" data-en="AI Model Accuracy" data-ar="دقة نموذج الذكاء الاصطناعي">AI Model Accuracy</span>
+                        </div>
+                        <span id="accuracy" class="text-sm font-black text-emerald-500"> </span>
+                    </div>
+
+                    <div class="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg flex items-center justify-between border border-slate-400 dark:border-slate-700/50 transition-colors">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2 bg-purple-100 dark:bg-purple-900/30 text-purple-600 rounded-md"><i class="fas fa-clock"></i></div>
+                            <span class="text-xs font-black text-black dark:text-slate-300 uppercase lang-txt" data-en="Clinical Hours" data-ar="الساعات السريرية">Clinical Hours</span>
+                        </div>
+                        <span id="clinical_hours" class="text-sm font-black text-black dark:text-white lang-txt"> </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-12 lg:col-span-8 space-y-6">
+                <div class="bg-white dark:bg-navy-cardDark rounded-xl shadow-sm border border-slate-400 dark:border-slate-800 p-8 transition-colors duration-300">
+                    <h3 class="text-xs font-900 text-black dark:text-emerald-400 uppercase tracking-wider mb-6 lang-txt" data-en="Professional Profile Info" data-ar="بيانات الملف المهني">Professional Profile Info</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-black text-black dark:text-slate-300 mb-1.5 uppercase lang-txt" data-en="First Name:" data-ar="الاسم الأول:">First Name:</label>
+                            <input id="first_name" type="text" value="" class="lang-txt w-full bg-slate-100 dark:bg-navy-bgDark border border-slate-400 dark:border-slate-700 rounded-md p-2.5 text-sm font-semibold text-black dark:text-white focus:outline-none focus:border-emerald-500 transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black text-black dark:text-slate-300 mb-1.5 uppercase lang-txt" data-en="Email Address:" data-ar="البريد الإلكتروني:">Email Address:</label>
+                            <input id="email" type="email" value="" class="w-full bg-slate-100 dark:bg-navy-bgDark border border-slate-400 dark:border-slate-700 rounded-md p-2.5 text-sm font-semibold text-black dark:text-white focus:outline-none focus:border-emerald-500 transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black text-black dark:text-slate-300 mb-1.5 uppercase lang-txt" data-en="Medical Facility / Clinic:" data-ar="المنشأة الطبية / العيادة:">Medical Facility / Clinic:</label>
+                            <input id="clinic_name" type="text" value="" data-en="Apex International Dental Center" data-ar="مركز أيبكس الدولي لطب الأسنان" class="lang-txt w-full bg-slate-100 dark:bg-navy-bgDark border border-slate-400 dark:border-slate-700 rounded-md p-2.5 text-sm font-semibold text-black dark:text-white focus:outline-none focus:border-emerald-500 transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black text-black dark:text-slate-300 mb-1.5 uppercase lang-txt" data-en="Specialty Focus:" data-ar="التخصص الدقيق:">Specialty Focus:</label>
+                            <select id="specialty" class="w-full bg-slate-100 dark:bg-navy-bgDark border border-slate-400 dark:border-slate-700 rounded-md p-2.5 text-sm font-bold text-black dark:text-white focus:outline-none focus:border-emerald-500 transition-colors">
+                                <option class="lang-txt" value="1" data-en="Oral & Maxillofacial Radiology" data-ar="أشعة الفم والوجه والفكين" selected>Oral & Maxillofacial Radiology</option>
+                                <option class="lang-txt" value="2" data-en="Orthodontics & Dentofacial Orthopedics" data-ar="تقويم الأسنان وجراحة عظام الوجه والأسنان">Orthodontics & Dentofacial Orthopedics</option>
+                                <option class="lang-txt" value="3" data-en="Endodontics" data-ar="علاج العصب وجذور الأسنان">Endodontics</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-navy-cardDark rounded-xl shadow-sm border border-slate-400 dark:border-slate-800 p-8 transition-colors duration-300">
+                    <h3 class="text-xs font-900 text-black dark:text-emerald-400 uppercase tracking-wider mb-6 lang-txt" data-en="AI & Diagnostic System Preferences" data-ar="تفضيلات نظام التشخيص والذكاء الاصطناعي">AI & Diagnostic System Preferences</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-black text-black dark:text-slate-300 mb-1.5 uppercase lang-txt" data-en="Default Enhancement Filter:" data-ar="فلتر تحسين الصور الافتراضي:">Default Enhancement Filter:</label>
+                            <select id="ai_filter" class="w-full bg-slate-100 dark:bg-navy-bgDark border border-slate-400 dark:border-slate-700 rounded-md p-2.5 text-sm font-bold text-black dark:text-white focus:outline-none focus:border-emerald-500 transition-colors">
+                                <option class="lang-txt" value="diffusion" data-en="Generative Diffusion Model (Ultra-Sharp)" data-ar="نموذج الانتشار التوليدي (فائق الدقة)" selected>Generative Diffusion Model (Ultra-Sharp)</option>
+                                <option class="lang-txt" value="clahe" data-en="CLAHE (Contrast Limited Adaptive Histogram)" data-ar="CLAHE (المدرج التكراري التكيفي محدود التباين)">CLAHE (Contrast Limited Adaptive Histogram)</option>
+                                <option class="lang-txt" value="none" data-en="Raw DICOM View" data-ar="عرض DICOM الخام">Raw DICOM View</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black text-black dark:text-slate-300 mb-1.5 uppercase lang-txt" data-en="Automated Report Language:" data-ar="لغة التقارير التلقائية:">Automated Report Language:</label>
+                            <select id="report_language" class="w-full bg-slate-100 dark:bg-navy-bgDark border border-slate-400 dark:border-slate-700 rounded-md p-2.5 text-sm font-bold text-black dark:text-white focus:outline-none focus:border-emerald-500 transition-colors">
+                                <option class="lang-txt" value="en" data-en="Bilingual (English with Arabic summary)" data-ar="ثنائي اللغة (الإنجليزية مع ملخص عربي)" selected>Bilingual (English with Arabic summary)</option>
+                                <option class="lang-txt" value="en_only" data-en="English Only" data-ar="الإنجليزية فقط">English Only</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-navy-cardDark rounded-xl shadow-sm border border-slate-400 dark:border-slate-800 p-8 transition-colors duration-300">
+                    <h3 class="text-xs font-900 text-black dark:text-emerald-400 uppercase tracking-wider mb-6 lang-txt" data-en="Security & Data Encryption" data-ar="الأمان وتشفير البيانات">Security & Data Encryption</h3>
+                    
+                    <div class="mb-6 flex justify-center">
+                        <button id="openModal" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black px-10 py-3 rounded-md text-xs uppercase tracking-wider shadow-md transition-all active:scale-[0.98] lang-txt" data-en="Change Password" data-ar="تغيير كلمة المرور">Change Password</button>
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-lg transition-colors">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-shield-alt text-emerald-500 text-xl mr-2"></i>
+                            <div>
+                                <p class="text-xs font-black text-black dark:text-emerald-400 uppercase tracking-tight lang-txt" data-en="Two-Factor Authentication (2FA)" data-ar="المصادقة الثنائية (2FA)">Two-Factor Authentication (2FA)</p>
+                                <p class="text-[10px] text-gray-700 dark:text-gray-400 font-bold mt-0.5 lang-txt" data-en="Secure patient HIPAA records using an authentication app." data-ar="حماية سجلات المرضى المتوافقة مع معايير HIPAA عبر تطبيق التحقق.">Secure patient HIPAA records using an authentication app.</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input id="Authentication" type="checkbox" checked class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-start space-x-4">
+                    <button id="discardChangesBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-900 font-black px-6 py-3 rounded-md text-xs uppercase tracking-wider transition-all lang-txt" data-en="Discard Changes" data-ar="إلغاء التعديلات">Discard Changes</button>
+                    <button id="saveSettingsBtn" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black px-8 py-3 rounded-md text-xs uppercase tracking-wider shadow-md transition-all active:scale-[0.98] lang-txt" data-en="Save Profile Settings" data-ar="حفظ إعدادات الحساب">Save Profile Settings</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+<script src="/static/js/doctor.js"></script>
+    <script>
+    // --- المتغيرات العامة ---
+    const langBtn = document.getElementById('langBtn');
+    const modeToggle = document.getElementById('modeToggle');
+    const modeIcon = document.getElementById('modeIcon');
+    const htmlEl = document.getElementById('mainHtml');
+    const modal = document.getElementById('passwordModal');
+    const openModalBtn = document.getElementById('openModal');
+    const closeModalBtn = document.getElementById('closeModal');
+    const confirmPasswordBtn = document.getElementById('confirmPasswordBtn');
+    const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+    const saveToast = document.getElementById('saveToast');
+    const toastText = document.getElementById('toastText');
+    const discardChangesBtn = document.getElementById('discardChangesBtn');
+    const discardModal = document.getElementById('discardModal');
+    const cancelDiscardBtn = document.getElementById('cancelDiscardBtn');
+    const confirmDiscardBtn = document.getElementById('confirmDiscardBtn');
+    const report_language = document.getElementById('report_language');
+    const token = localStorage.getItem("token");
+    const profileImg = document.getElementById("profileImg");
+    const profileInput = document.getElementById("profileInput");
+    let uploadedProfileImage = null;
+
+profileImg.addEventListener("click", () => {
+    profileInput.click();
+});
+
+    let currentLang = localStorage.getItem('sdxd_lang') || 'en';
+    let currentTheme = localStorage.getItem('theme') || 'light';
+
+    // --- 1. الدوال الأساسية (اللغة والثيم) ---
+    function applyLanguage(lang) {
+        document.querySelectorAll('.lang-txt').forEach(el => {
+            if (el.tagName === 'OPTION') {
+                const txt = el.getAttribute(`data-${lang}`);
+                if (txt) el.text = txt;
+            } else if (el.tagName === 'INPUT') {
+                const placeholder = el.getAttribute(`data-placeholder-${lang}`);
+                if (placeholder) el.placeholder = placeholder;
+            } else {
+                const txt = el.getAttribute(`data-${lang}`);
+                if (txt) el.innerText = txt;
+            }
+        });
+
+        const created = document.getElementById("created_at");
+        if (created && created.dataset.date) {
+            const date = new Date(created.dataset.date);
+            const monthsEn = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+            const monthsAr = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+            created.innerText = (lang === "ar" ? monthsAr[date.getMonth()] : monthsEn[date.getMonth()]) + " " + date.getFullYear();
+        }
+        htmlEl.dir = "ltr";
+    }
+
+    function applyTheme(theme) {
+        if (theme === 'dark') {
+            htmlEl.classList.add('dark');
+            modeIcon.className = 'fas fa-sun text-lg';
+        } else {
+            htmlEl.classList.remove('dark');
+            modeIcon.className = 'fas fa-moon text-lg';
+        }
+    }
+
+    // --- 2. إدارة البيانات والاتصال بالخادم ---
+    async function loadDoctorData() {
+        if (!token) { alert("يرجى تسجيل الدخول"); return; }
+        try {
+            const response = await fetch("http://127.0.0.1:5000/doctor/account", {
+                headers: { Authorization: "Bearer " + token }
+            });
+            const data = await response.json();
+            document.getElementById("license_number").innerText = "# " + data.license_number;
+            document.getElementById("first_name").value = data.first_name ||  "";
+            document.getElementById("email").value = data.email || "";
+            document.getElementById("clinic_name").value = data.clinic_name || "";
+            document.getElementById("specialty").value = data.specialty;
+            document.getElementById("ai_filter").value = data.ai_filter;
+            document.getElementById("created_at").dataset.date = data.created_at;
+            document.getElementById("report_language").value = data.report_language;
+            applyLanguage(currentLang);
+            document.getElementById("profileImg").src = data.profile_photo ? `http://127.0.0.1:5000/upload/${data.profile_photo}`: "https://ui-avatars.com/api/?name=Admin&background=345e85&color=fff&size=128";
+            uploadedProfileImage = data.profile_photo; 
+        } catch (err) { console.error("Error loading:", err); }
+    }
+
+async function loadMetrics() {
+    const token = localStorage.getItem("token");
+    try {
+        const res = await fetch("http://127.0.0.1:5000/doctor-metrics", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            // تحديث الواجهة بالعناصر الموجودة في الـ HTML
+            document.getElementById("total_scans").innerText = data.total_scans;
+            document.getElementById("accuracy").innerText = data.accuracy + "%";
+            document.getElementById("clinical_hours").innerText = data.clinical_hours + " hrs";
+        } else {
+            console.error("خطأ في جلب البيانات:", data.message);
+        }
+    } catch (err) {
+        console.error("تعذر الاتصال بالسيرفر:", err);
+    }
+}
+
+    async function saveProfile() {
+    // تأكد أن أسماء الـ IDs هنا هي نفسها الموجودة في الـ HTML
+    const body = {
+        first_name: document.getElementById("first_name").value,
+        email: document.getElementById("email").value,
+        clinic_name: document.getElementById("clinic_name").value,
+        specialty: document.getElementById("specialty").value,
+        ai_filter: document.getElementById("ai_filter").value,
+        report_language: document.getElementById("report_language").value,
+        profile_photo: uploadedProfileImage
+    };
+
+    const res = await fetch("http://127.0.0.1:5000/doctor/account", {
+        method: "Put",
+        headers: { 
+            "Content-Type": "application/json", 
+            "Authorization": "Bearer " + token 
+        },
+        body: JSON.stringify(body)
+    });
+
+    const result = await res.json();
+    
+    // فحص ما إذا كان السيرفر أرجع رسالة نجاح فعلية
+    if (res.ok) {
+        alert("تم الحفظ بنجاح");
+        loadDoctorData(); 
+    } else {
+        // إذا كان هناك خطأ في السيرفر، سيظهر هنا
+        alert("خطأ من السيرفر: " + JSON.stringify(result));
+    }
+}
+
+    async function changePassword() {
+        const currentPass = document.getElementById('currentPassword').value.trim();
+        const newPass = document.getElementById('newPassword').value.trim();
+        const confirmPass = document.getElementById('confirmPassword').value.trim();
+
+        if (!currentPass || !newPass || !confirmPass) {
+            alert(currentLang === 'ar' ? 'يرجى تعبئة الحقول!' : 'Fill all fields!');
+            return;
+        }
+        if (newPass !== confirmPass) {
+            alert(currentLang === 'ar' ? 'كلمة المرور غير متطابقة!' : 'Passwords do not match!');
+            return;
+        }
+
+        const res = await fetch("http://127.0.0.1:5000/doctor/change-password", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+            body: JSON.stringify({ currentPassword: currentPass, newPassword: newPass })
+        });
+        const data = await res.json();
+        alert(data.message);
+        if (res.ok) { closeModal(); }
+    }
+
+    // --- 3. الأحداث (Event Listeners) ---
+    document.addEventListener('DOMContentLoaded', () => {
+        applyLanguage(currentLang);
+        applyTheme(currentTheme);
+        loadDoctorData();
+        loadMetrics();
+    });
+
+    langBtn.addEventListener('click', () => {
+        currentLang = currentLang === 'en' ? 'ar' : 'en';
+        localStorage.setItem('sdxd_lang', currentLang);
+        applyLanguage(currentLang);
+    });
+
+    modeToggle.addEventListener('click', () => {
+        currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+        localStorage.setItem('theme', currentTheme);
+        applyTheme(currentTheme);
+    });
+
+    // أحداث المودال
+    openModalBtn.addEventListener('click', () => {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.classList.add('opacity-100');
+    });
+
+    closeModalBtn.addEventListener('click', closeModal = () => {
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        modal.classList.remove('opacity-100');
+    });
+
+    confirmPasswordBtn.addEventListener('click', changePassword);
+
+    saveSettingsBtn.addEventListener('click', saveProfile);
+    
+    discardChangesBtn.addEventListener('click', () => {
+        location.reload();
+        loadDoctorData();
+        alert("تم التراجع");
+    });
+
+    document.querySelectorAll('.toggle-password').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const input = this.parentElement.querySelector('input');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        });
+    });
+
+    profileInput.addEventListener("change", async function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+        const res = await fetch("http://127.0.0.1:5000/doctor/upload-photo", {
+            method: "POST",
+            headers: {
+                Authorization: "Bearer " + token
+            },
+            body: formData
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            // عرض الصورة مباشرة
+            profileImg.src = "http://127.0.0.1:5000" + data.url;
+            uploadedProfileImage = data.filename || data.url;
+            alert("تم رفع الصورة بنجاح");
+        } else {
+            alert(data.message);
+        }
+
+    } catch (err) {
+        console.error(err);
+        alert("خطأ في رفع الصورة");
+    }
+});
+
+</script>
+</body>
+</html>

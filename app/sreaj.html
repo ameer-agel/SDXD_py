@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en" id="mainHtml" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDXD - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* إعدادات المتغيرات للوضع الليلي والنهاري */
+        :root { 
+            --sidebar-blue: #345e85; 
+            --accent-emerald: #10b981;
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --header-bg: #ffffff;
+            --border-color: #e2e8f0;
+        }
+
+        .dark-mode {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --header-bg: #1e293b;
+            --sidebar-blue: #1a365d;
+            --border-color: #334155;
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-body); 
+            color: var(--text-main);
+            transition: all 0.3s ease;
+            direction: ltr !important; /* إجبار المتصفح على البقاء جهة اليسار دائماً */
+        }
+
+        /* Sidebar */
+        #sidebar { 
+            min-width: 260px; 
+            background: var(--sidebar-blue); 
+            color: #fff; 
+            height: 100vh; 
+            flex-shrink: 0;
+            transition: background 0.3s ease;
+        }
+
+        .sidebar-header { padding: 30px 10px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        
+        #sidebar ul li a { 
+            padding: 14px 25px; 
+            display: flex; 
+            align-items: center; 
+            color: #cbdcf0; 
+            text-decoration: none; 
+            font-size: 14px; 
+            transition: 0.3s; 
+        }
+
+        /* تأثير الـ Hover على عناصر السايد بار */
+        #sidebar ul li a:hover {
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+        }
+
+        /* تحديد الحافة النشطة جهة اليسار دائماً لتتوافق مع الـ LTR الثابت */
+        #sidebar ul li.active a { 
+            background: rgba(255,255,255,0.1); 
+            color: #fff; 
+            border-left: 4px solid var(--accent-emerald); 
+            border-right: none;
+        }
+
+        #sidebar ul li a i { margin-right: 12px; margin-left: 0; width: 20px; text-align: center; }
+
+        /* Header */
+        header { 
+            background: var(--header-bg); 
+            border-bottom: 1px solid var(--border-color); 
+            padding: 16px 30px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+
+        .header-tool-btn { 
+            width: 40px; 
+            height: 40px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 10px; 
+            color: var(--text-muted); 
+            cursor: pointer; 
+            transition: 0.3s; 
+            border: 1px solid var(--border-color); 
+            background: var(--bg-card);
+        }
+
+        .header-tool-btn:hover { background-color: rgba(0,0,0,0.05); color: var(--accent-emerald); }
+        
+        /* Cards */
+        .stat-card { 
+            background: var(--bg-card); 
+            border: 1px solid var(--border-color); 
+            border-radius: 1rem; 
+            padding: 1.5rem; 
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+        
+        .activity-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            transition: background 0.3s ease;
+        }
+
+        .fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .lang-txt { display: inline-block; }
+
+        /* تعديلات المود لمتوافقات الكود الأصلي */
+        .dark-mode .text-slate-800 { color: #f1f5f9; }
+        .dark-mode .text-slate-500 { color: #94a3b8; }
+        .dark-mode .bg-gray-50 { background-color: rgba(255,255,255,0.05); }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <nav id="sidebar">
+        <div class="sidebar-header">
+            <h2 class="text-2xl font-black italic">SDXD</h2>
+            <div class="my-4"><i class="fas fa-tooth fa-3x"></i></div>
+            <p class="text-[10px] font-bold opacity-70 uppercase tracking-widest lang-txt" data-en="Smart Dental System" data-ar="نظام الأسنان الذكي">Smart Dental System</p>
+        </div>
+        <ul class="mt-6">
+            <li class="active"><a href="sreaj.html"><i class="fas fa-home"></i> <span class="lang-txt" data-en="Home" data-ar="الرئيسية">Home</span></a></li>
+            <li><a href="newscan.html"><i class="fas fa-user-plus"></i> <span class="lang-txt" data-en="Patient" data-ar="المريض">Patient</span></a></li>
+            <li><a href="dashboard.html"><i class="fas fa-folder-open"></i> <span class="lang-txt" data-en="Records" data-ar="السجلات">Records</span></a></li>
+            <li><a href="myanalysis.html"><i class="fas fa-chart-pie"></i> <span class="lang-txt" data-en="Analysis" data-ar="التحليلات">Analysis</span></a></li>
+            <li><a href="account.html"><i class="fas fa-user-circle"></i> <span class="lang-txt" data-en="Account" data-ar="الحساب">Account</span></a></li>
+            <li><a href="help.html"><i class="fas fa-question-circle"></i> <span class="lang-txt" data-en="Help" data-ar="المساعدة">Help</span></a></li>
+            <li><a href="loginpat.html"><i class="fas fa-sign-out text-red-400 hover:text-red-500"></i><span class=" text-[14px] text-red-400 hover:text-red-500 lang-txt" data-en="Log out" data-ar="تسجيل الخروج"> Log out</span></a></li>
+        </ul>
+    </nav>
+
+    <div class="flex-1 flex flex-col overflow-y-auto">
+        
+        <header>
+            <div class="flex items-center gap-6">
+                <h1 class="text-xl font-bold tracking-tight text-slate-800 lang-txt" data-en="Smart Dental X-ray Diagnosis System" data-ar="النظام الذكي لتشخيص أشعة الأسنان">Smart Dental X-ray Diagnosis System</h1>
+                
+                <div class="flex items-center gap-4 ml-2">
+                    <div class="w-9 h-9 bg-slate-50 dark:bg-slate-700/50 rounded-full flex items-center justify-center text-rose-500 shadow-sm border border-slate-100 dark:border-slate-700"><i class="fas fa-heartbeat"></i></div>
+                    <div class="w-9 h-9 bg-slate-50 dark:bg-slate-700/50 rounded-full flex items-center justify-center text-blue-500 shadow-sm border border-slate-100 dark:border-slate-700"><i class="fas fa-tooth"></i></div>
+                    <div class="w-9 h-9 bg-slate-50 dark:bg-slate-700/50 rounded-full flex items-center justify-center text-cyan-500 shadow-sm border border-slate-100 dark:border-slate-700 animate-pulse"><i class="fas fa-robot"></i> <span class="text-[9px] font-black ml-0.5">AI</span></div>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <div class="header-tool-btn" id="langBtn" title="Translate"><i class="fas fa-language text-xl"></i></div>
+                <div class="header-tool-btn" id="modeToggle" title="Toggle Mode">
+                    <i class="fas fa-moon text-lg" id="modeIcon"></i>
+                </div>
+            </div>
+        </header>
+
+        <div class="p-10 max-w-7xl mx-auto w-full fade-in">
+            <div class="flex justify-between items-end mb-10">
+                <div class="text-left">
+                    <h1 class="text-3xl font-extrabold text-slate-800 uppercase lang-txt" id="doctorName" data-en=" Welcome back " data-ar=" مرحباً بك مجدداً "> Welcome back </h1>
+                    <p class="text-sm text-slate-500 mt-1 lang-txt" data-en="Ready to visualize the future of dental diagnostics." data-ar="جاهز لاستعراض مستقبل تشخيصات الأسنان.">Ready to visualize the future of dental diagnostics.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+                <div class="stat-card">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase lang-txt" data-en="Total Scans" data-ar="إجمالي الفحوصات">Total Scans</p>
+                    <h2 id="total_scans" class="text-4xl font-extrabold text-slate-800 mt-1"> 0 </h2>
+                </div>
+                <div class="stat-card">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase lang-txt" data-en="AI Confidence" data-ar="دقة الذكاء">AI Confidence</p>
+                    <h2 id="ai_accuracy" class="text-4xl font-extrabold text-slate-800 mt-1"> 0% </h2>
+                </div>
+                <div class="stat-card">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase lang-txt" data-en="Reports Today" data-ar="تقارير اليوم">Reports Today</p>
+                    <h2 id="reports_today" class="text-4xl font-extrabold text-slate-800 mt-1"> 0 </h2>
+                </div>
+                <div class="stat-card">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase lang-txt" data-en="Active Patients" data-ar="المرضى الحاليين">Active Patients</p>
+                    <h2 id="active_patients" class="text-4xl font-extrabold text-slate-800 mt-1"> 0 </h2>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-12 gap-8">
+                <div class="col-span-12 activity-card rounded-xl p-8 shadow-sm">
+                    <div class="flex justify-between items-center border-b border-gray-100 dark:border-gray-700 pb-5 mb-6">
+                        <h3 class="text-sm font-bold text-gray-700 uppercase tracking-widest lang-txt" data-en="Recent Diagnostic Activity" data-ar="نشاطات التشخيص الأخيرة">Recent Diagnostic Activity</h3>
+                        <button id="btnViewAll" class="text-xs text-blue-700 dark:text-blue-400 font-bold uppercase hover:underline lang-txt"" data-en=" View All " data-ar=" عرض الكل "> View All </button>                    
+                    </div>
+                    
+                    <div class="space-y-4" id="recentActivityContainer">
+                        <div class="text-center p-6 text-gray-400 font-medium">
+                            Loading activity...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<script src="/static/js/doctor.js"></script>
+    <script>
+        const modeToggle = document.getElementById('modeToggle');
+const modeIcon = document.getElementById('modeIcon');
+const langBtn = document.getElementById('langBtn');
+const mainHtml = document.getElementById('mainHtml');
+const body = document.body;
+
+let currentTheme = localStorage.getItem('theme') || 'light';
+let currentLang = localStorage.getItem('lang') || 'en';
+let isExpanded = false;
+
+/* ===================== THEME ===================== */
+function applyTheme(theme) {
+    if (theme === 'dark') {
+        body.classList.add('dark-mode');
+        if (modeIcon) {
+            modeIcon.classList.replace('fa-moon', 'fa-sun');
+        }
+    } else {
+        body.classList.remove('dark-mode');
+        if (modeIcon) {
+            modeIcon.classList.replace('fa-sun', 'fa-moon');
+        }
+    }
+    localStorage.setItem('theme', theme);
+}
+
+/* ===================== LANGUAGE ===================== */
+function updateLanguage(lang) {
+    mainHtml.setAttribute('lang', lang);
+    mainHtml.setAttribute('dir', 'ltr');
+
+    document.querySelectorAll('.lang-txt').forEach(el => {
+        const text = el.getAttribute(`data-${lang}`);
+        if (text) el.innerText = text;
+    });
+
+    const btnViewAll = document.getElementById('btnViewAll');
+    if (btnViewAll) {
+        btnViewAll.innerText = btnViewAll.getAttribute(`data-${lang}`);
+    }
+
+    localStorage.setItem('lang', lang);
+}
+
+/* ===================== DOCTOR INFO ===================== */
+async function loadDoctorInfo() {
+    const token = localStorage.getItem('token');
+    if (!token) return (window.location.href = '/loginpat.html');
+
+    try {
+        const res = await fetch('/doctor-info', {
+            headers: { Authorization: 'Bearer ' + token }
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            const el = document.getElementById('doctorName');
+
+            el.innerText = `Welcome back, Dr. ${data.first_name}`;
+            el.setAttribute('data-en', `Welcome back, Dr. ${data.first_name}`);
+            el.setAttribute('data-ar', ` مرحباً بك مجدداً ، Dr. ${data.first_name}`);
+
+            if (currentLang === 'ar') {
+                el.innerText = `مرحباً بك مجدداً، د. ${data.first_name}`;
+            }
+        } else {
+            window.location.href = '/loginpat.html';
+        }
+    } catch (err) {
+        window.location.href = '/loginpat.html';
+    }
+}
+
+/* ===================== STATS ===================== */
+async function loadStats() {
+    const token = localStorage.getItem('token');
+
+    try {
+        const res = await fetch('/dashboard-stats', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            document.getElementById('total_scans').innerText = data.total_scans;
+            document.getElementById('ai_accuracy').innerText = data.ai_accuracy + '%';
+            document.getElementById('reports_today').innerText = data.reports_today;
+            document.getElementById('active_patients').innerText = data.active_patients;
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+/* ===================== RECENT ACTIVITY ===================== */
+async function loadRecentActivity(showAll = false) {
+    try {
+        const token = localStorage.getItem('token');
+
+        const res = await fetch('/recent-activity', {
+            headers: { Authorization: 'Bearer ' + token }
+        });
+
+        const data = await res.json();
+
+        const container = document.getElementById('recentActivityContainer');
+        const btnViewAll = document.getElementById('btnViewAll');
+
+        if (!data.success) return;
+
+        const list = showAll ? data.activities : data.activities.slice(0, 5);
+
+        container.innerHTML = '';
+
+        list.forEach(act => {
+            const name = act.patient_name || 'Unknown';
+            const id = act.PatientID || 'N/A';
+            const diagnosis = act.diagnosis_label || 'Pending AI';
+
+            container.insertAdjacentHTML('beforeend', `
+                <div class="p-4 border-b border-gray-100 dark:border-slate-700">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm font-bold">
+                                ${name} <span class="text-gray-500">(ID: ${id})</span>
+                            </p>
+                            <p class="text-xs text-blue-600">${diagnosis}</p>
+                        </div>
+                        <span class="text-[10px] text-gray-400">${act.scan_date}</span>
+                    </div>
+                </div>
+            `);
+        });
+
+        if (btnViewAll) {
+            const lang = localStorage.getItem('lang') || 'en';
+
+            btnViewAll.innerText = showAll
+                ? (lang === 'ar' ? 'عرض أقل' : 'Show Less')
+                : (lang === 'ar' ? 'عرض الكل' : 'View All');
+        }
+
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+/* ===================== EVENTS ===================== */
+modeToggle.addEventListener('click', () => {
+    currentTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
+    applyTheme(currentTheme);
+});
+
+langBtn.addEventListener('click', () => {
+    currentLang = currentLang === 'en' ? 'ar' : 'en';
+    updateLanguage(currentLang);
+    loadRecentActivity(isExpanded);
+});
+
+/* زر View All */
+document.addEventListener('DOMContentLoaded', () => {
+    loadDoctorInfo();
+    loadStats();
+    loadRecentActivity(false);
+
+    const btn = document.getElementById('btnViewAll');
+    if (btn) {
+        btn.addEventListener('click', () => {
+            isExpanded = !isExpanded;
+            loadRecentActivity(isExpanded);
+        });
+    }
+});
+
+/* تشغيل أولي */
+applyTheme(currentTheme);
+updateLanguage(currentLang);
+</script>
+</body>
+</html>

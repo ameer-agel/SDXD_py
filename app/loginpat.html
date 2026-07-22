@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en" id="mainHtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDXD - Unified Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2=family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --sidebar-blue: #345e85; 
+            --accent-emerald: #10b981;
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #000000; 
+            --text-muted: #334155; 
+        }
+
+        .dark-mode {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #ffffff; 
+            --text-muted: #cbd5e1; 
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-body); 
+            color: var(--text-main);
+            transition: all 0.3s ease;
+        }
+
+        .login-card { 
+            background: var(--bg-card); 
+            border: 1px solid rgba(0,0,0,0.05); 
+            border-radius: 1.5rem; 
+            transition: background 0.3s ease;
+        }
+        .dark-mode .login-card { border-color: rgba(255,255,255,0.05); }
+
+        .header-tool-btn { 
+            width: 40px; 
+            height: 40px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 10px; 
+            color: var(--text-muted); 
+            cursor: pointer; 
+            transition: 0.3s; 
+            border: 1px solid #e2e8f0; 
+            background: var(--bg-card);
+        }
+        .dark-mode .header-tool-btn { border-color: #334155; }
+        .header-tool-btn:hover { background-color: rgba(0,0,0,0.05); color: var(--accent-emerald); }
+        .dark-mode .header-tool-btn:hover { background-color: rgba(255,255,255,0.05); }
+
+        input {
+            width: 100%;
+            border-radius: 0.5rem;
+            border: 1px solid #94a3b8; 
+            background: rgba(0,0,0,0.02);
+            color: var(--text-main);
+            outline: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .dark-mode input { background: rgba(255,255,255,0.05); border-color: #475569; }
+        input:focus { border-color: var(--accent-emerald); box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); }
+
+        .btn-primary {
+            background-color: var(--sidebar-blue);
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #274765;
+            transform: translateY(-1px);
+        }
+
+        .fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .lang-txt { display: inline-block; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between relative overflow-x-hidden">
+
+    <div class="absolute top-6 right-6 flex gap-3 z-50" id="controlsContainer">
+        <div class="header-tool-btn" id="langBtn" title="Translate"><i class="fas fa-language text-xl"></i></div>
+        <div class="header-tool-btn" id="modeToggle" title="Toggle Mode">
+            <i class="fas fa-moon text-lg" id="modeIcon"></i>
+        </div>
+    </div>
+
+    <div class="flex-1 flex items-center justify-center p-6 mt-12">
+        <div class="login-card w-full max-w-md p-8 md:p-10 shadow-xl fade-in text-center">
+            
+            <div class="mb-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" style="background: var(--sidebar-blue); color: white;">
+                    <i class="fas fa-tooth fa-2x"></i>
+                </div>
+                <h2 class="text-3xl font-black italic tracking-wide" style="color: var(--sidebar-blue);">SDXD</h2>
+                <p class="text-xs font-bold opacity-70 uppercase tracking-widest mt-1 lang-txt" data-en="Smart Dental Portal" data-ar="بوابة الأسنان الذكية">Smart Dental Portal</p>
+            </div>
+
+            <form id="loginForm" class="space-y-5 text-left">
+                
+                <div>
+                    <label id="userLabel" class="block text-xs font-extrabold uppercase tracking-wider mb-2 lang-txt" data-en="ID" data-ar="رقم الملف" style="color: var(--text-muted);"></label>
+                    <div class="relative" id="userIconWrapper">
+                        <span class="icon-span absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <i class="fas fa-user text-slate-400"></i>
+                        </span>
+                        <input type="text" id="loginId" required class="lang-placeholder" data-en-placeholder="Enter Username or ID..." data-ar-placeholder="أدخل اسم المستخدم أو رقم الملف..." placeholder="Enter Username or ID...">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold uppercase tracking-wider mb-2 lang-txt" data-en="Password" data-ar="كلمة المرور" style="color: var(--text-muted);"></label>
+                    <div class="relative" id="passIconWrapper">
+                        <span class="icon-span absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <i class="fas fa-lock text-slate-400"></i>
+                        </span>
+                        <input type="password" id="password" required class="lang-placeholder" data-en-placeholder="Enter password..." data-ar-placeholder="أدخل كلمة المرور..." placeholder="Enter password...">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between text-xs font-bold pt-1">
+                    <label class="flex items-center gap-2 cursor-pointer" style="color: var(--text-muted);">
+                    </label>
+                    <a href="helpLog.html" class="hover:underline transition-colors" style="color: var(--accent-emerald);">
+                        <span class="lang-txt" data-en="Need Help?" data-ar="تحتاج مساعدة؟">Need Help?</span>
+                    </a>
+                </div>
+
+                <button type="submit" class="btn-primary w-full py-3 rounded-xl font-bold tracking-wide shadow-lg uppercase text-sm mt-4 flex items-center justify-center gap-2">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span class="lang-txt" data-en="Login to Dashboard" data-ar="تسجيل الدخول للنظام">Login to Dashboard</span>
+                </button>
+            </form>
+
+            <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700/50 text-xs font-bold" style="color: var(--text-muted);">
+                <span class="lang-txt" data-en="Unified Dental Portal System" data-ar="نظام بوابة عيادة الأسنان الموحد">Unified Dental Portal System</span> 
+            </div>
+
+        </div>
+    </div>
+
+    <footer class="p-6 text-center text-xs font-bold opacity-60" style="color: var(--text-muted);">
+        <p>&copy; 2026 SDXD Smart Dental System. All rights reserved.</p>
+    </footer>
+    <script>
+        const modeToggle = document.getElementById('modeToggle');
+        const modeIcon = document.getElementById('modeIcon');
+        const langBtn = document.getElementById('langBtn');
+        const body = document.body;
+        const controlsContainer = document.getElementById('controlsContainer');
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                body.classList.add('dark-mode');
+                if (modeIcon) modeIcon.classList.replace('fa-moon', 'fa-sun');
+            } else {
+                body.classList.remove('dark-mode');
+                if (modeIcon) modeIcon.classList.replace('fa-sun', 'fa-moon');
+            }
+        }
+
+        function applyLanguage(lang) {
+            document.querySelectorAll('.lang-txt').forEach(el => {
+                el.innerText = el.getAttribute(`data-${lang}`);
+            });
+            
+            const inputs = document.querySelectorAll('input[type="text"], input[type="password"]');
+            const forms = document.querySelectorAll('form');
+            const iconSpans = document.querySelectorAll('.icon-span');
+            
+            if (lang === 'ar') {
+                body.style.direction = 'rtl';
+                controlsContainer.classList.replace('right-6', 'left-6');
+                forms.forEach(f => f.classList.replace('text-left', 'text-right'));
+                
+                iconSpans.forEach(span => {
+                    span.classList.replace('left-0', 'right-0');
+                    span.classList.replace('pl-3', 'pr-3');
+                });
+
+                inputs.forEach(input => {
+                    input.placeholder = input.getAttribute(`data-${lang}-placeholder`);
+                    input.style.padding = '0.75rem 2.5rem 0.75rem 1rem';
+                });
+            } else {
+                body.style.direction = 'ltr';
+                controlsContainer.classList.replace('left-6', 'right-6');
+                forms.forEach(f => f.classList.replace('text-right', 'text-left'));
+                
+                iconSpans.forEach(span => {
+                    span.classList.replace('right-0', 'left-0');
+                    span.classList.replace('pr-3', 'pl-3');
+                });
+
+                inputs.forEach(input => {
+                    input.placeholder = input.getAttribute(`data-${lang}-placeholder`);
+                    input.style.padding = '0.75rem 1rem 0.75rem 2.5rem';
+                });
+            }
+        }
+
+        let currentTheme = localStorage.getItem('theme') || 'light';
+        let currentLang = localStorage.getItem('lang') || 'en';
+        
+        applyTheme(currentTheme);
+        applyLanguage(currentLang);
+
+        if (modeToggle) {
+            modeToggle.addEventListener('click', () => {
+                currentTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
+                localStorage.setItem('theme', currentTheme);
+                applyTheme(currentTheme);
+            });
+        }
+
+        if (langBtn) {
+            langBtn.addEventListener('click', () => {
+                currentLang = currentLang === 'en' ? 'ar' : 'en';
+                localStorage.setItem('lang', currentLang);
+                applyLanguage(currentLang);
+            });
+        }
+
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'theme') applyTheme(e.newValue);
+            if (e.key === 'lang') applyLanguage(e.newValue);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+    const rememberedUser = localStorage.getItem('remembered_user');
+    if (rememberedUser) {
+        document.getElementById('loginId').value = rememberedUser;
+    }
+});
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const inputVal = document.getElementById('loginId').value.trim();
+            const passVal = document.getElementById('password').value.trim();
+            const rememberMeEl = document.getElementById('rememberMe');
+            const rememberMeChecked = rememberMeEl ? rememberMeEl.checked : false;
+
+            try {
+                // التوجيه إلى المسار النسبي المباشر للسيرفر
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        loginId: inputVal,
+                        password: passVal
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    sessionStorage.setItem('isLoggedIn', 'true');
+                    sessionStorage.setItem("token", data.token);
+                    sessionStorage.setItem('role', data.role);
+                    sessionStorage.setItem('auth_token', data.token);
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('role', data.role);
+                    
+                    if (rememberMeChecked) {
+                        localStorage.setItem('remembered_user', inputVal);
+                    } else {
+                        localStorage.removeItem('remembered_user');
+                    }
+
+                    // التوجيه باستخدام المسارات المطلقة للسيرفر لتجنب مشاكل المجلدات
+                    if (data.role === 'doctor') {
+                        window.location.href = '/sreaj.html';
+                    } else if (data.role === 'patient') {
+                        window.location.href = '/patient-dashboard.html';
+                    }else if (data.role === 'admin') {
+                        window.location.href = '/manager-dashboard.html';
+                    }
+
+                } else {
+                    const errorMsg = currentLang === 'ar'
+                        ? 'كلمة المرور أو بيانات الدخول خاطئة'
+                        : 'Invalid ID/Username or Password';
+                    alert(errorMsg);
+                }
+
+            } catch (error) {
+                const connError = currentLang === 'ar' ? 'تعذر الاتصال بالخادم Flask' : 'Failed to connect to Flask server';
+                alert(connError);
+            }
+        });
+    </script>
+</body>
+</html>

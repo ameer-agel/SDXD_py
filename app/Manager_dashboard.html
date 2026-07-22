@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDXD — لوحة تحكم المدير</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/manager.css') }}">
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="manager-header">
+    <a href="/manager-dashboard.html" class="logo">SDXD <span>Manager</span></a>
+
+    <nav>
+        <ul class="manager-nav">
+            <li><a href="/manager-dashboard.html">🏠 الرئيسية</a></li>
+            <li><a href="/manager-page.html">👤 بيانات المدير</a></li>
+            <li><button onclick="toggleDarkMode()" class="dark-toggle">🌙</button></li>
+            <li><button onclick="managerLogout()" class="logout-btn">تسجيل خروج</button></li>
+        </ul>
+    </nav>
+</header>
+
+<!-- ===== MAIN ===== -->
+<main class="manager-main">
+
+    <!-- إحصائيات سريعة -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-num" id="stat-doctors">—</div>
+            <div class="stat-label">عدد الأطباء</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num" id="stat-patients">—</div>
+            <div class="stat-label">عدد المرضى</div>
+        </div>
+    </div>
+
+    <!-- ===== التابات ===== -->
+    <div class="tabs-bar">
+        <button class="tab-btn active" data-tab="doctors-tab" onclick="switchTab('doctors-tab', this)">👨‍⚕️ الأطباء</button>
+        <button class="tab-btn" data-tab="patients-tab" onclick="switchTab('patients-tab', this)">🧑‍🦱 المرضى</button>
+    </div>
+
+    <!-- ===== تاب الأطباء ===== -->
+    <div class="tab-panel active" id="doctors-tab">
+        <div class="card">
+            <div class="card-title">
+                <span>👨‍⚕️ إدارة الأطباء</span>
+                <button class="btn btn-success btn-sm" onclick="openModal('add-doctor-modal')">+ إضافة طبيب</button>
+            </div>
+
+            <div class="search-bar">
+                <input type="text" id="doctor-search-input" class="form-input" placeholder="ابحث برقم الطبيب (idDoctor)...">
+                <button class="btn btn-secondary btn-sm" onclick="loadDoctors()">إعادة تحميل الكل</button>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="manager-table">
+                    <thead>
+                        <tr>
+                            <th>رقم الطبيب</th>
+                            <th>الاسم الكامل</th>
+                            <th>كلمة المرور</th>
+                            <th>البريد الإلكتروني</th>
+                            <th>الهاتف</th>
+                            <th>التخصص</th>
+                            <th>العيادة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="doctors-tbody">
+                        <tr><td colspan="8" class="empty-state">جاري التحميل...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== تاب المرضى ===== -->
+    <div class="tab-panel" id="patients-tab">
+        <div class="card">
+            <div class="card-title">
+                <span>🧑‍🦱 إدارة المرضى</span>
+                <button class="btn btn-success btn-sm" onclick="openModal('add-patient-modal')">+ إضافة مريض</button>
+            </div>
+
+            <div class="search-bar">
+                <input type="text" id="patient-search-input" class="form-input" placeholder="ابحث برقم الهوية (PatientId)...">
+                <button class="btn btn-secondary btn-sm" onclick="loadPatients()">إعادة تحميل الكل</button>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="manager-table">
+                    <thead>
+                        <tr>
+                            <th>رقم الهوية</th>
+                            <th>الاسم الكامل</th>
+                            <th>الهاتف</th>
+                            <th>البريد الإلكتروني</th>
+                            <th>تاريخ الميلاد</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patients-tbody">
+                        <tr><td colspan="6" class="empty-state">جاري التحميل...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- ===== MODAL: ADD DOCTOR ===== -->
+<div class="modal-overlay" id="add-doctor-modal">
+    <div class="modal-box">
+        <div class="modal-title">➕ إضافة طبيب جديد</div>
+        <form id="add-doctor-form" autocomplete="off">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">رقم الطبيب (idDoctor)</label>
+                    <input type="text" id="add-doc-idDoctor" class="form-input" placeholder="مثال: 1023" />
+                    <span class="error-msg" id="add-doc-idDoctor-error"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">كلمة المرور</label>
+                    <input type="text" id="add-doc-password" class="form-input" placeholder="كلمة المرور" />
+                    <span class="error-msg" id="add-doc-password-error"></span>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">الاسم الأول</label>
+                    <input type="text" id="add-doc-first" class="form-input" />
+                    <span class="error-msg" id="add-doc-first-error"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الاسم الأخير</label>
+                    <input type="text" id="add-doc-last" class="form-input" />
+                    <span class="error-msg" id="add-doc-last-error"></span>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">البريد الإلكتروني</label>
+                    <input type="email" id="add-doc-email" class="form-input" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الهاتف</label>
+                    <input type="text" id="add-doc-phone" class="form-input" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">التخصص</label>
+                    <input type="text" id="add-doc-specialty" class="form-input" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">اسم العيادة</label>
+                    <input type="text" id="add-doc-clinic" class="form-input" />
+                </div>
+            </div>
+            <p class="form-hint">اسم دخول الطبيب يُحسب تلقائياً (الحرف الأول من اسمه + رقم الطبيب).</p>
+            <div class="btn-group">
+                <button type="submit" class="btn btn-success">إضافة</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('add-doctor-modal')">إلغاء</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===== MODAL: EDIT DOCTOR ===== -->
+<div class="modal-overlay" id="edit-doctor-modal">
+    <div class="modal-box">
+        <div class="modal-title">✏️ تعديل بيانات الطبيب</div>
+        <form id="edit-doctor-form" autocomplete="off">
+            <input type="hidden" id="edit-doc-idDoctor" />
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">الاسم الأول</label>
+                    <input type="text" id="edit-doc-first" class="form-input" />
+                    <span class="error-msg" id="edit-doc-first-error"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الاسم الأخير</label>
+                    <input type="text" id="edit-doc-last" class="form-input" />
+                    <span class="error-msg" id="edit-doc-last-error"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">كلمة المرور</label>
+                <input type="text" id="edit-doc-password" class="form-input" />
+                <span class="error-msg" id="edit-doc-password-error"></span>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">البريد الإلكتروني</label>
+                    <input type="email" id="edit-doc-email" class="form-input" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الهاتف</label>
+                    <input type="text" id="edit-doc-phone" class="form-input" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">التخصص</label>
+                    <input type="text" id="edit-doc-specialty" class="form-input" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">اسم العيادة</label>
+                    <input type="text" id="edit-doc-clinic" class="form-input" />
+                </div>
+            </div>
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary">حفظ التعديلات</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('edit-doctor-modal')">إلغاء</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===== MODAL: ADD PATIENT ===== -->
+<div class="modal-overlay" id="add-patient-modal">
+    <div class="modal-box">
+        <div class="modal-title">➕ إضافة مريض جديد</div>
+        <form id="add-patient-form" autocomplete="off">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">رقم الهوية (PatientId)</label>
+                    <input type="text" id="add-pat-id" class="form-input" />
+                    <span class="error-msg" id="add-pat-id-error"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الاسم الكامل</label>
+                    <input type="text" id="add-pat-name" class="form-input" />
+                    <span class="error-msg" id="add-pat-name-error"></span>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">الهاتف</label>
+                    <input type="text" id="add-pat-phone" class="form-input" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">البريد الإلكتروني</label>
+                    <input type="email" id="add-pat-email" class="form-input" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">تاريخ الميلاد</label>
+                    <input type="date" id="add-pat-dob" class="form-input" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">كلمة المرور (اختياري)</label>
+                    <input type="text" id="add-pat-password" class="form-input" placeholder="افتراضياً = رقم الهوية" />
+                </div>
+            </div>
+            <div class="btn-group">
+                <button type="submit" class="btn btn-success">إضافة</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('add-patient-modal')">إلغاء</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===== MODAL: EDIT PATIENT ===== -->
+<div class="modal-overlay" id="edit-patient-modal">
+    <div class="modal-box">
+        <div class="modal-title">✏️ تعديل بيانات المريض</div>
+        <form id="edit-patient-form" autocomplete="off">
+            <input type="hidden" id="edit-pat-id" />
+            <div class="form-group">
+                <label class="form-label">الاسم الكامل</label>
+                <input type="text" id="edit-pat-name" class="form-input" />
+                <span class="error-msg" id="edit-pat-name-error"></span>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">الهاتف</label>
+                    <input type="text" id="edit-pat-phone" class="form-input" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">البريد الإلكتروني</label>
+                    <input type="email" id="edit-pat-email" class="form-input" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">تاريخ الميلاد</label>
+                    <input type="date" id="edit-pat-dob" class="form-input" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">كلمة مرور جديدة (اتركها فارغة لعدم التغيير)</label>
+                    <input type="text" id="edit-pat-password" class="form-input" />
+                </div>
+            </div>
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary">حفظ التعديلات</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('edit-patient-modal')">إلغاء</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===== MODAL: DELETE CONFIRM (عام للطبيب/المريض) ===== -->
+<div class="modal-overlay" id="delete-modal">
+    <div class="modal-box">
+        <div class="modal-title">🗑 تأكيد الحذف</div>
+        <input type="hidden" id="delete-target-id" />
+        <input type="hidden" id="delete-target-type" />
+        <p style="color:var(--text-muted); margin-bottom:20px;">
+            هل أنت متأكد من حذف <strong id="delete-target-name" style="color:var(--danger);"></strong>؟ هذا الإجراء لا يمكن التراجع عنه.
+        </p>
+        <div class="btn-group">
+            <button class="btn btn-danger" onclick="submitDelete()">حذف</button>
+            <button class="btn btn-secondary" onclick="closeModal('delete-modal')">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/manager.js') }}"></script>
+</body>
+</html>

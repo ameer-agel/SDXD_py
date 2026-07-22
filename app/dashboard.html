@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en" id="mainHtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDXD - Patient Records</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { 
+            --sidebar-blue: #345e85; 
+            --accent-emerald: #10b981;
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --header-bg: #ffffff;
+            --border-color: #e2e8f0;
+        }
+
+        .dark-mode {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --header-bg: #1e293b;
+            --sidebar-blue: #1a365d;
+            --border-color: #334155;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-body); 
+            color: var(--text-main);
+            direction: ltr !important; 
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Sidebar */
+        #sidebar { 
+            min-width: 260px; 
+            background: var(--sidebar-blue); 
+            color: #fff; 
+            height: 100vh; 
+            flex-shrink: 0;
+            transition: background 0.3s ease;
+        }
+
+        .sidebar-header { padding: 30px 10px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        
+        #sidebar ul li a { 
+            padding: 14px 25px; 
+            display: flex; 
+            align-items: center; 
+            color: #cbdcf0; 
+            text-decoration: none; 
+            font-size: 14px; 
+            transition: 0.3s; 
+            border-left: 4px solid transparent; 
+        }
+
+        #sidebar ul li.active a { 
+            background: rgba(255,255,255,0.1); 
+            color: #fff; 
+            border-left: 4px solid var(--accent-emerald); 
+        }
+
+        #sidebar ul li a i { margin-right: 12px; width: 20px; text-align: center; }
+
+        /* Header */
+        header { 
+            background: var(--header-bg); 
+            border-bottom: 1px solid var(--border-color); 
+            padding: 12px 30px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+        
+        .header-tool-btn { 
+            width: 40px; 
+            height: 40px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 10px; 
+            color: var(--text-muted); 
+            cursor: pointer; 
+            transition: 0.3s; 
+            border: 1px solid var(--border-color); 
+        }
+
+        .header-tool-btn:hover { background-color: rgba(0,0,0,0.05); color: var(--accent-emerald); }
+
+        /* Table Styling */
+        .table-container { 
+            background: var(--bg-card); 
+            border: 1px solid var(--border-color); 
+            border-radius: 1rem; 
+            overflow: hidden; 
+            transition: background 0.3s ease;
+        }
+
+        th { background: rgba(0,0,0,0.02); color: var(--text-muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; padding: 15px; border-bottom: 1px solid var(--border-color); }
+        td { padding: 15px; font-size: 13px; border-bottom: 1px solid var(--border-color); }
+        
+        .dark-mode th { background: rgba(255,255,255,0.05); }
+        .fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* حل مشكلة وضوح النصوص الثابتة والعناوين في الوضع الداكن */
+        .dark-mode h1, 
+        .dark-mode p#drName, 
+        .dark-mode td.font-bold { 
+            color: var(--text-main) !important; 
+        }
+        .dark-mode .patient-row:hover {
+            background-color: rgba(255, 255, 255, 0.02) !important;
+        }
+    </style>
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark', 'dark-mode');
+        }
+    </script>
+</head>
+<body>
+
+    <nav id="sidebar">
+        <div class="sidebar-header">
+            <h2 class="text-2xl font-black italic">SDXD</h2>
+            <div class="my-4"><i class="fas fa-tooth fa-3x"></i></div>
+            <p class="text-[10px] font-bold opacity-70 uppercase tracking-widest lang-txt" data-en="Smart Dental System" data-ar="نظام الأسنان الذكي">Smart Dental System</p>
+        </div>
+        <ul class="mt-6">
+            <li><a href="sreaj.html"><i class="fas fa-home"></i> <span class="lang-txt" data-en="Home" data-ar="الرئيسية">Home</span></a></li>
+            <li><a href="newscan.html"><i class="fas fa-user-plus"></i> <span class="lang-txt" data-en="Patient" data-ar="المريض">Patient</span></a></li>            
+            <li class="active"><a href="dashboard.html"><i class="fas fa-folder-open"></i> <span class="lang-txt" data-en="Records" data-ar="السجلات">Records</span></a></li>
+            <li><a href="myanalysis.html"><i class="fas fa-chart-pie"></i> <span class="lang-txt" data-en="Analysis" data-ar="التحليلات">Analysis</span></a></li>
+            <li><a href="account.html"><i class="fas fa-user-circle"></i> <span class="lang-txt" data-en="Account" data-ar="الحساب">Account</span></a></li>
+            <li><a href="help.html"><i class="fas fa-question-circle"></i> <span class="lang-txt" data-en="Help" data-ar="المساعدة">Help</span></a></li>
+            <li><a href="loginpat.html"><i class="fas fa-sign-out text-red-400 hover:text-red-500 "></i><span class="text-red-400 hover:text-red-500 lang-txt" data-en="Log out" data-ar="تسجيل الخروج"> Log out</span></a></li>
+        </ul>
+    </nav>
+
+    <div class="flex-1 flex flex-col overflow-y-auto">
+        <header>
+            <div class="flex gap-3">
+                <div class="header-tool-btn" id="langBtn" title="Translate"><i class="fas fa-language text-xl"></i></div>
+                <div class="header-tool-btn" id="modeToggle" title="Toggle Mode">
+                    <i class="fas fa-moon text-lg" id="modeIcon"></i>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="text-right">
+                    <p class="text-xs font-black text-black dark:text-white" id="headerDocName"> </p>
+                    <p class="text-[10px] text-emerald-500 font-bold uppercase">Admin</p>
+                </div>
+                <img id="profile_photo" class="w-9 h-9 rounded-full border border-slate-200">
+            </div>
+        </header>
+
+        <div class="p-8 max-w-6xl mx-auto w-full fade-in">
+            <div class="mb-8">
+                <h1 class="text-2xl font-extrabold text-slate-800 uppercase lang-txt" data-en="Patient Diagnostic Records" data-ar="سجلات تشخيص المرضى">Patient Diagnostic Records</h1>
+                <p class="text-sm text-slate-500 mt-1 lang-txt" data-en="View and manage all previous X-ray analysis reports." data-ar="عرض وإدارة جميع تقارير تحليل الأشعة السينية السابقة.">View and manage all previous X-ray analysis reports.</p>
+            </div>
+
+            <div class="mb-6 flex justify-start" id="searchWrapper">
+                <div class="relative w-full max-w-md shadow-sm rounded-xl">
+                    <div class="absolute inset-y-0 flex items-center px-4 pointer-events-none text-slate-400" id="searchIconWrapper" style="left: 0;">
+                        <i class="fas fa-search text-sm"></i>
+                    </div>
+                    <input type="text" id="patientSearchInput" 
+                           class="w-full pl-11 pr-4 py-2.5 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#345e85] transition-all" 
+                           style="background: var(--bg-card); color: var(--text-main);"
+                           placeholder="Search Patient by ID..." 
+                           data-en-placeholder="Search Patient by ID..." 
+                           data-ar-placeholder="ابحث عن مريض من خلال الرقم...">
+                </div>
+            </div>
+
+            <div class="table-container shadow-sm">
+                <table class="w-full text-left" id="patientTable">
+                    <thead>
+                        <tr>
+                            <th class="lang-txt" data-en="Date" data-ar="التاريخ">Date</th>
+                            <th class="lang-txt" data-en="Patient ID" data-ar="رقم المريض">Patient ID</th>
+                            <th class="lang-txt" data-en="Patient Name" data-ar="اسم المريض">Patient Name</th>
+                            <th class="lang-txt" data-en="Diagnosis" data-ar="التشخيص">Diagnosis</th>
+                            <th class="lang-txt" data-en="Confidence" data-ar="نسبة التأكيد">Confidence</th>
+                            <th class="lang-txt" data-en="Status" data-ar="الحالة">Status</th>
+                            <th class="lang-txt" data-en="Action" data-ar="إجراء">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recordsTableBody" class="bg-white divide-y divide-gray-200 dark:bg-slate-800 dark:divide-slate-700" >
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+<script src="/static/js/doctor.js"></script>
+    <script>
+        // كود الترجمة والتحكم في الواجهة
+        const langBtn = document.getElementById('langBtn');
+        const searchInput = document.getElementById('patientSearchInput');
+        const searchIconWrapper = document.getElementById('searchIconWrapper');
+        let currentLang = 'en';
+
+        langBtn.addEventListener('click', () => {
+            currentLang = currentLang === 'en' ? 'ar' : 'en';
+            document.querySelectorAll('.lang-txt').forEach(el => {
+                el.innerText = el.getAttribute(`data-${currentLang}`);
+            });
+            
+            const isAr = currentLang === 'ar';
+            document.getElementById('mainHtml').dir = isAr ? 'rtl' : 'ltr';
+            document.body.style.direction = isAr ? 'rtl' : 'ltr';
+            
+            const align = isAr ? 'right' : 'left';
+            document.querySelectorAll('th, td').forEach(el => {
+                el.style.textAlign = align;
+            });
+
+            // تطويع حقل البحث بما يتماشى مع اتجاه اللغة المحددة
+            if (searchInput && searchIconWrapper) {
+                const placeholderValue = searchInput.getAttribute(`data-${currentLang}-placeholder`);
+                searchInput.setAttribute('placeholder', placeholderValue);
+                
+                if (isAr) {
+                    searchInput.style.paddingRight = '2.75rem';
+                    searchInput.style.paddingLeft = '1rem';
+                    searchIconWrapper.style.left = 'auto';
+                    searchIconWrapper.style.right = '0';
+                    document.getElementById('searchWrapper').classList.replace('justify-start', 'justify-end');
+                } else {
+                    searchInput.style.paddingLeft = '2.75rem';
+                    searchInput.style.paddingRight = '1rem';
+                    searchIconWrapper.style.right = 'auto';
+                    searchIconWrapper.style.left = '0';
+                    document.getElementById('searchWrapper').classList.replace('justify-end', 'justify-start');
+                }
+            }
+        });
+
+        // سكريبت البحث الفوري الذكي بالاعتماد على رقم المريض Patient ID
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const filter = this.value.toLowerCase().trim();
+                const rows = document.querySelectorAll('.patient-row');
+                
+                rows.forEach(row => {
+                    const idElement = row.querySelector('.patient-id');
+                    if (idElement) {
+                        const idText = idElement.textContent || idElement.innerText;
+                        if (idText.toLowerCase().includes(filter)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    }
+                });
+            });
+        }
+
+        // كود تبديل وتخزين الوضع الليلي المشترك
+        const modeToggle = document.getElementById('modeToggle');
+        const modeIcon = document.getElementById('modeIcon');
+
+        function updateIcon() {
+            if (document.body.classList.contains('dark-mode')) {
+                modeIcon.classList.replace('fa-moon', 'fa-sun');
+            } else {
+                modeIcon.classList.replace('fa-sun', 'fa-moon');
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.documentElement.classList.add('dark');
+            updateIcon();
+        }
+
+        modeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            document.documentElement.classList.toggle('dark');
+            
+            if (document.body.classList.contains('dark-mode')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+            
+            updateIcon();
+        });
+
+        // --- دالة جلب السجلات الطبية من السيرفر وبناء الجدول ديناميكياً ---
+// --- دالة جلب السجلات الطبية وعرضها ديناميكياً ---
+        async function loadDiagnosticRecords() {
+            const tableBody = document.getElementById('recordsTableBody');
+            if(!tableBody) return;
+            
+            try {
+                const token = localStorage.getItem("token");
+
+                 const response = await fetch("/api/get-records", {
+    headers: {
+        "Authorization": "Bearer " + token
+    }
+});
+                const data = await response.json();
+                
+                
+                if (data.success && data.records.length > 0) {
+                    tableBody.innerHTML = ''; // تنظيف الأسطر القديمة الثابتة
+                    
+                    data.records.forEach(record => {
+                        // 1. قراءة الوقت والتاريخ المنسق القادم مباشرة من الفلاسك
+                        let formattedDate = record.scan_date || '---';
+
+                        // 2. تحديد الألوان الخاصة بحالة الفحص تلقائياً
+                        let statusClass = 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
+                        if (record.status === 'done') {
+                            statusClass = 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+                        } else if (record.status === 'processing') {
+                            statusClass = 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
+                        }
+
+
+                        const row = `
+                            <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white font-medium">${formattedDate}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-slate-400 font-semibold table-patient-id">${record.patient_national_id}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">${record.patient_name}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-slate-400">
+                                    <span class="px-2.5 py-1 text-xs font-semibold bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 rounded-full">${record.notes || 'No notes'}</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white font-bold text-emerald-500">AI Done</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <span class="px-2.5 py-0.5 text-xs font-bold rounded-full uppercase ${statusClass}">${record.status || 'pending'}</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button onclick="goToPatientScan(${record.scan_id}, '${record.patient_national_id}')" 
+                                            class="bg-slate-800 text-white px-3 py-1.5 rounded-lg text-[11px] font-bold hover:bg-emerald-500 transition-all uppercase tracking-wider">
+                                        View
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                        tableBody.insertAdjacentHTML('beforeend', row);
+                    });
+                } else {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="px-6 py-10 text-center text-sm text-gray-500 dark:text-slate-400">
+                                📁 لا توجد سجلات تشخيصية مخزنة في قاعدة البيانات حالياً.
+                            </td>
+                        </tr>
+                    `;
+                }
+            } catch (error) {
+                console.error("Error loading records:", error);
+            }
+        }
+
+        // --- 4. الدالة المسؤولة عن حفظ البيانات والتحويل لصفحة view.html بدون s ---
+        function goToPatientScan(scanId, patientId) {
+            sessionStorage.setItem('current_view_scan_id', scanId);
+            sessionStorage.setItem('current_analysis_patient_id', patientId);
+            
+            // التوجيه الصحيح لصفحة عرض التقارير المؤرشفة
+            window.location.href = 'view.html'; 
+        }
+
+        // تشغيل الجلب التلقائي عند فتح الصفحة
+        document.addEventListener('DOMContentLoaded', loadDiagnosticRecords);
+    </script>
+    <script>
+    // هذه دالة بحث مستقلة تماماً
+    document.getElementById('patientSearchInput').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim(); // الكلمة التي كتبها الطبيب
+        const tableBody = document.getElementById('recordsTableBody');
+        const rows = tableBody.getElementsByTagName('tr'); // جلب كل صفوف الجدول
+
+        // المرور على كل صف والبحث عن رقم الهوية
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            // نفترض أن رقم الهوية موجود في الخلية الثانية (index 1)
+            const idCell = row.getElementsByTagName('td')[1]; 
+            
+            if (idCell) {
+                const idText = idCell.textContent || idCell.innerText;
+                // إظهار الصف إذا كان يحتوي على الرقم، وإخفاؤه إذا لم يحتوي
+                if (idText.toLowerCase().indexOf(searchTerm) > -1) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>

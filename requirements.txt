@@ -1,0 +1,7 @@
+Flask
+flask-cors
+PyMySQL
+PyJWT
+Werkzeug
+gradio_client
+gunicorn

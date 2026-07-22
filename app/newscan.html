@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en" id="mainHtml" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDXD - Patient Diagnosis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --sidebar-blue: #345e85; 
+            --accent-emerald: #10b981;
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #000000; 
+            --text-muted: #1e293b; 
+            --header-bg: #ffffff;
+            --border-color: #94a3b8; 
+        }
+
+        .dark-mode {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --header-bg: #1e293b;
+            --sidebar-blue: #1a365d;
+            --border-color: #475569;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-body); 
+            color: var(--text-main);
+            transition: all 0.3s ease;
+            direction: ltr !important;
+        }
+
+        #sidebar { 
+            min-width: 260px; 
+            background: var(--sidebar-blue); 
+            color: #fff; 
+            height: 100vh; 
+            flex-shrink: 0;
+            transition: background 0.3s ease;
+        }
+
+        .sidebar-header { padding: 30px 10px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        
+        #sidebar ul li a { 
+            padding: 14px 25px; 
+            display: flex; 
+            align-items: center; 
+            color: #cbdcf0; 
+            text-decoration: none; 
+            font-size: 14px; 
+            transition: 0.3s; 
+        }
+
+        #sidebar ul li a:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        #sidebar ul li.active a { background: rgba(255,255,255,0.1); color: #fff; border-left: 4px solid var(--accent-emerald); border-right: none; }
+        #sidebar ul li a i { margin-right: 12px; margin-left: 0; width: 20px; text-align: center; }
+
+        header { 
+            background: var(--header-bg); 
+            border-bottom: 1px solid var(--border-color); 
+            padding: 12px 30px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+
+        .header-tool-btn { 
+            width: 40px; 
+            height: 40px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 10px; 
+            color: var(--text-muted); 
+            cursor: pointer; 
+            transition: 0.3s; 
+            border: 1px solid var(--border-color); 
+        }
+
+        .header-tool-btn:hover { background-color: rgba(0,0,0,0.05); color: var(--accent-emerald); }
+        .upload-dashed { border: 2px dashed var(--accent-emerald); background-color: rgba(16, 185, 129, 0.05); }
+        .upload-dashed.dragover { background-color: rgba(16, 185, 129, 0.15); border-color: #047857; transform: scale(1.01); }
+        
+        .navy-card-title { font-size: 0.85rem; font-weight: 900; color: #000000; text-transform: uppercase; letter-spacing: 0.05em; }
+        .dark-mode .navy-card-title { color: var(--accent-emerald); }
+        
+        .fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        input { background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-main); font-weight: 600; }
+        .wave-icon { margin-right: 0.5rem; margin-left: 0; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <nav id="sidebar">
+        <div class="sidebar-header">
+            <h2 class="text-2xl font-black italic">SDXD</h2>
+            <div class="my-4"><i class="fas fa-tooth fa-3x"></i></div>
+            <p class="text-[10px] font-bold opacity-70 uppercase tracking-widest lang-txt" data-en="Smart Dental System" data-ar="نظام الأسنان الذكي">Smart Dental System</p>
+        </div>
+        <ul class="mt-6">
+            <li><a href="sreaj.html"><i class="fas fa-home"></i> <span class="lang-txt" data-en="Home" data-ar="الرئيسية">Home</span></a></li>
+            <li class="active"><a href="newscan.html"><i class="fas fa-user-plus"></i> <span class="lang-txt" data-en="Patient" data-ar="المريض">Patient</span></a></li>            
+            <li><a href="dashboard.html"><i class="fas fa-folder-open"></i> <span class="lang-txt" data-en="Records" data-ar="السجلات">Records</span></a></li>
+            <li><a href="myanalysis.html"><i class="fas fa-chart-pie"></i> <span class="lang-txt" data-en="Analysis" data-ar="التحليلات">Analysis</span></a></li>
+            <li><a href="account.html"><i class="fas fa-user-circle"></i> <span class="lang-txt" data-en="Account" data-ar="الحساب">Account</span></a></li>
+            <li><a href="help.html"><i class="fas fa-question-circle"></i> <span class="lang-txt" data-en="Help" data-ar="المساعدة">Help</span></a></li>
+            <li><a href="loginpat.html"><i class="fas fa-sign-out text-red-400 hover:text-red-500 "></i><span class="text-red-400 hover:text-red-500 lang-txt" data-en="Log out" data-ar="تسجيل الخروج"> Log out</span></a></li>      
+        </ul>
+    </nav>
+
+    <div class="flex-1 flex flex-col overflow-y-auto">
+        <header>
+            <div class="flex gap-3">
+                <div class="header-tool-btn" id="langBtn" title="Translate"><i class="fas fa-language text-xl"></i></div>
+                <div class="header-tool-btn" id="modeToggle" title="Toggle Mode">
+                    <i class="fas fa-moon text-lg" id="modeIcon"></i>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="text-right">
+                    <p class="text-xs font-black text-black dark:text-white" id="headerDocName"> </p>
+                    <p class="text-[10px] text-emerald-500 font-bold uppercase">Admin</p>
+                </div>
+                <img id="profile_photo" class="w-9 h-9 rounded-full border border-slate-200">
+            </div>
+        </header>
+
+        <div class="p-8 grid grid-cols-12 gap-6 fade-in w-full max-w-7xl mx-auto">
+            <div class="col-span-12 lg:col-span-8 bg-[var(--bg-card)] rounded-xl shadow-sm border border-[var(--border-color)] p-8">
+                <h1 class="text-2xl font-black mb-6 uppercase tracking-tight text-black dark:text-white lang-txt" data-en="Dental X-Ray Diagnostic Dashboard" data-ar="لوحة تشخيص الأشعة السينية">Dental X-Ray Diagnostic Dashboard</h1>
+                
+                <div class="flex border-b border-[var(--border-color)] mb-6">
+                    <button id="tabExisting" class="py-2.5 px-5 text-xs font-black uppercase tracking-wider border-b-2 border-emerald-500 text-emerald-500 focus:outline-none transition-all lang-txt" data-en="Existing Patient" data-ar="مريض مسجل">Existing Patient</button>
+                    <button id="tabNew" class="py-2.5 px-5 text-xs font-black uppercase tracking-wider border-b-2 border-transparent text-gray-400 hover:text-emerald-500 focus:outline-none transition-all lang-txt" data-en="Sign Up (New Patient)" data-ar="تسجيل مريض جديد">Sign Up (New Patient)</button>
+                </div>
+
+                <!-- نموذج المريض المسجل مسبقاً -->
+                <div id="existingPatientForm" class="block animate-fade-in">
+                    <h3 class="navy-card-title mb-5 lang-txt" data-en="Patient Case Details" data-ar="تفاصيل حالة المريض">Patient Case Details</h3>
+                    
+                    <div class="mb-6 max-w-md">
+                        <label class="block text-xs font-black text-black dark:text-gray-300 mb-1.5 uppercase lang-txt" data-en="Search Patient by ID:" data-ar="البحث عن مريض بالرقم الهوية :">Search Patient by ID:</label>
+                        <div class="relative flex items-center">
+                            <span class="absolute left-3 text-gray-400 dark:text-gray-500">
+                                <i class="fas fa-search text-xs"></i>
+                            </span>
+                            <input type="text" id="patientSearchInput" oninput="searchPatient(this.value)" placeholder="Enter ID (e.g., A1102)" class="w-full pl-9 pr-3 rounded-md p-2 text-xs focus:outline-none focus:ring-1 ring-emerald-400 placeholder-gray-400 dark:placeholder-gray-500">
+                        </div>
+                        <p id="searchFeedback" class="text-[11px] mt-1 font-bold hidden"></p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div>
+                            <label class="block text-xs font-black text-black dark:text-gray-300 mb-1.5 uppercase lang-txt" data-en="Patient Name:" data-ar="اسم المريض:">Patient Name:</label>
+                            <div id="displayPatientName" class="py-2 text-sm font-semibold text-gray-400 dark:text-slate-500">
+                                ---
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black text-black dark:text-gray-300 mb-1.5 uppercase lang-txt" data-en="Patient ID:" data-ar="رقم المريض:">Patient ID:</label>
+                            <div id="displayPatientId" class="py-2 text-sm font-semibold text-gray-400 dark:text-slate-500">
+                                ---
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- نموذج مريض جديد -->
+                <div id="newPatientForm" class="hidden animate-fade-in">
+                    <h3 class="navy-card-title mb-5 text-emerald-500 lang-txt" data-en="Create New Patient Account" data-ar="إنشاء حساب مريض جديد">Create New Patient Account</h3>
+                    <form id="signUpForm" onsubmit="handleSignUp(event)" class="space-y-5 mb-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-xs font-black text-black dark:text-gray-300 mb-1.5 uppercase lang-txt" data-en="Full Name:" data-ar="الاسم الكامل:">Full Name:</label>
+                                <input type="text" id="signUpName" required placeholder="Ex: Khalid Mansoor" class="w-full rounded-md p-2.5 text-sm focus:outline-none focus:ring-1 ring-emerald-400 placeholder-gray-400 dark:placeholder-gray-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-black text-black dark:text-gray-300 mb-1.5 uppercase lang-txt" data-en="Patient ID:" data-ar="رقم المريض الدولي (ID):">Patient ID:</label>
+                                <input type="text" id="newPatientIdInput" required pattern="\d{9}" title="رقم الهوية يجب أن يتكون من 9 أرقام فقط" oninput="this.value = this.value.replace(/[^0-9]/g, '')"  placeholder="Ex: A1102" class="w-full rounded-md p-2.5 text-sm focus:outline-none focus:ring-1 ring-emerald-400 placeholder-gray-400 dark:placeholder-gray-500">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-xs font-black text-black dark:text-gray-300 mb-1.5 uppercase lang-txt" data-en="Phone Number:" data-ar="رقم الهاتف:">Phone Number:</label>
+                                <input type="tel" id="phoneInput" required pattern="[0-9]{10}" title="Must be exactly 10 digits" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Ex: 0500000000" class="w-full rounded-md p-2.5 text-sm focus:outline-none focus:ring-1 ring-emerald-400 placeholder-gray-400 dark:placeholder-gray-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-black text-black dark:text-gray-300 mb-1.5 uppercase lang-txt" data-en="Email Address:" data-ar="البريد الإلكتروني:">Email Address:</label>
+                                <input type="email" id="signUpEmail" placeholder="patient@example.com" class="w-full rounded-md p-2.5 text-sm focus:outline-none focus:ring-1 ring-emerald-400 placeholder-gray-400 dark:placeholder-gray-500">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-xs font-black text-black dark:text-gray-300 mb-1.5 uppercase lang-txt" data-en="Date of Birth:" data-ar="تاريخ الميلاد:">Date of Birth:</label>
+                                <input type="date" id="signUpDOB" required class="w-full rounded-md p-2.5 text-sm focus:outline-none focus:ring-1 ring-emerald-400 text-black dark:text-white">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-3 rounded-md text-xs uppercase tracking-widest shadow-md transition-all active:scale-[0.98] lang-txt" data-en="Done & Register Patient" data-ar="تم وتسجيل المريض">
+                            Done & Register Patient
+                        </button>
+                    </form>
+                </div>
+
+                <!-- منطقة رفع الملف وبدء التحليل -->
+                <div id="uploadAndProcessSection">
+                    <div id="dropZone" class="upload-dashed rounded-xl p-14 text-center cursor-pointer mb-8 relative group transition-all">
+                        <input type="file" id="fileInput" accept="image/*,.dicom" class="hidden">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-emerald-500 mb-4 group-hover:scale-110 transition-transform"></i>
+                        <h4 id="uploadTitle" class="text-sm font-black text-black dark:text-white uppercase tracking-tight lang-txt" data-en="Drag & Drop X-Ray File" data-ar="اسحب وأفلت ملف الأشعة هنا">Drag & Drop X-Ray File</h4>
+                        <p id="uploadSub" class="text-[10px] text-gray-500 dark:text-gray-400 mt-2 font-bold italic uppercase lang-txt" data-en="Or Click to Browse (PNG, JPG, DICOM)" data-ar="أو اضغط للتصفح (PNG, JPG, DICOM)">Or Click to Browse (PNG, JPG, DICOM)</p>
+                    </div>
+
+                    <div class="flex items-center bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-800 p-4 rounded-lg mb-8">
+                        <i class="fas fa-wave-square text-emerald-500 animate-pulse wave-icon"></i>
+                        <div class="text-[10px] font-bold uppercase text-emerald-800 dark:text-emerald-400">
+                            <span class="lang-txt" data-en="Pre-processing Active:" data-ar="المعالجة المسبقة نشطة:">Pre-processing Active:</span> 
+                            <span class="font-medium opacity-80 italic lang-txt" data-en="System: Image Enhancement Ready" data-ar="النظام: تحسين الصور جاهز">System: Image Enhancement Ready</span>
+                        </div>
+                    </div>
+
+                    <button id="processBtn" onclick="processAndAnalyze()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold py-3.5 rounded-md text-sm uppercase tracking-widest shadow-md transition-all active:scale-[0.98] lang-txt" data-en="Process & Analyze Scan" data-ar="بدء تحليل الفحص">
+                        Process & Analyze Scan
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-span-12 lg:col-span-4 space-y-6">
+                <div class="bg-[var(--bg-card)] rounded-xl shadow-sm border border-[var(--border-color)] p-6">
+                    <h3 class="navy-card-title mb-5 lang-txt" data-en="System Analytics" data-ar="تحليلات النظام">System Analytics</h3>
+                    
+                    <div class="mb-6">
+                        <p class="text-[9px] font-black text-black dark:text-gray-400 uppercase mb-3 lang-txt" data-en="Clinical Partnership" data-ar="الشراكة السريرية">Clinical Partnership</p>
+                        <div class="flex items-center gap-3 grayscale opacity-70">
+                            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/0/08/Tufts_University_logo.svg/1200px-Tufts_University_logo.svg.png" class="h-6 object-contain">
+                            <span class="text-lg font-bold text-gray-300">|</span>
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Kaggle_logo.png" class="h-5 object-contain">
+                        </div>
+                    </div>
+
+                    <div class="border-t border-[var(--border-color)] pt-5">
+                        <p class="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase mb-1.5 italic lang-txt" data-en="Technology: Diffusion Models" data-ar="التقنية: نماذج الانتشار">Technology: Diffusion Models</p>
+                        <p class="text-[9px] leading-relaxed text-black dark:text-[var(--text-muted)] font-bold lang-txt" data-en="Generative AI enhances dental diagnosis and image quality." data-ar="الذكاء الاصطناعي التوليدي يحسن تشخيص الأسنان وجودة الصور.">Generative AI enhances dental diagnosis and image quality.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script src="/static/js/doctor.js"></script>
+    <script>
+        const modeToggle = document.getElementById('modeToggle');
+        const modeIcon = document.getElementById('modeIcon');
+        const langBtn = document.getElementById('langBtn');
+        const mainHtml = document.getElementById('mainHtml');
+        const body = document.body;
+
+        const tabExisting = document.getElementById('tabExisting');
+        const tabNew = document.getElementById('tabNew');
+        const existingPatientForm = document.getElementById('existingPatientForm');
+        const newPatientForm = document.getElementById('newPatientForm');
+        const patientSearchInput = document.getElementById('patientSearchInput');
+        const newPatientIdInput = document.getElementById('newPatientIdInput');
+        const uploadAndProcessSection = document.getElementById('uploadAndProcessSection');
+
+        let currentTheme = localStorage.getItem('theme') || 'light';
+        let currentLang = localStorage.getItem('lang') || 'en';
+        let selectedPatientId = null; // للاحتفاظ بالمعرّف المختار للتحليل
+
+        // حماية الواجهة والتحقق من الطبيب
+        async function checkDoctorAuth() {
+            const token = sessionStorage.getItem('auth_token');
+            if (!token) { window.location.href = '/loginpat.html'; return; }
+            try {
+                const res = await fetch('/doctor-info', { headers: { 'Authorization': 'Bearer ' + token } });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('headerDocName').innerText = `Dr. ${data.first_name}`;
+                } else { window.location.href = '/loginpat.html'; }
+            } catch { window.location.href = '/loginpat.html'; }
+        }
+        checkDoctorAuth();
+
+        // دالة البحث التلقائي عن مريض بالـ ID
+        async function searchPatient(idValue) {
+            const feedback = document.getElementById('searchFeedback');
+            const nameDiv = document.getElementById('displayPatientName');
+            const idDiv = document.getElementById('displayPatientId');
+            
+            if(!idValue.trim()) {
+                nameDiv.innerText = '---'; idDiv.innerText = '---';
+                feedback.classList.add('hidden'); selectedPatientId = null;
+                return;
+            }
+
+            try {
+                const res = await fetch(`/get-patient?id=${encodeURIComponent(idValue.trim())}`);
+                const data = await res.json();
+
+                if(data.success) {
+                    nameDiv.innerText = data.patient.name;
+                    idDiv.innerText = data.patient.id; // يعرض رقم الهوية 44441111
+                    nameDiv.classList.remove('text-gray-400');
+                    idDiv.classList.remove('text-gray-400');
+                    feedback.innerText = currentLang === 'ar' ? '✅ تم العثور على المريض' : '✅ Patient found';
+                    feedback.className = "text-[11px] mt-1 font-bold text-green-500 block";
+                    
+                    // حفظ الـ ID التلقائي الخاص بقاعدة البيانات (patient_id) للعمليات اللاحقة كرفع الأشعة
+                    selectedPatientId = data.patient.db_id;
+                } else {
+                    nameDiv.innerText = '---'; idDiv.innerText = '---';
+                    feedback.innerText = currentLang === 'ar' ? '❌ المريض غير مسجل' : '❌ Patient not found';
+                    feedback.className = "text-[11px] mt-1 font-bold text-red-500 block";
+                    selectedPatientId = null;
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        // دالة تسجيل مريض جديد وحفظه بالـ Database بنجاح وديناميكية تامة
+        async function handleSignUp(event) {
+            event.preventDefault();
+            
+            // تصحيح الدوال البرمجية وتطهير المدخلات
+            const pName = document.getElementById('signUpName').value ? document.getElementById('signUpName').value.trim() : '';
+            const pId = document.getElementById('newPatientIdInput').value ? document.getElementById('newPatientIdInput').value.trim() : '';
+            const pPhone = document.getElementById('phoneInput').value ? document.getElementById('phoneInput').value.trim() : '';
+            const pEmail = document.getElementById('signUpEmail').value ? document.getElementById('signUpEmail').value.trim() : '';
+            const pDOB = document.getElementById('signUpDOB').value;
+
+            // شرط حماية إلزامي للهوية الفلسطينية المكونة من 9 أرقام بالضبط
+            if (pId.length !== 9) {
+                alert(currentLang === 'ar' ? '❌ رقم الهوية الفلسطينية يجب أن يتكون من 9 أرقام بالضبط!' : '❌ Palestinian ID must be exactly 9 digits!');
+                return;
+            }
+
+            try {
+                const response = await fetch('/add-patient', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        patient_id: pId,    // مطابق للمتغيرات المستقبلة في الفلاسك
+                        full_name: pName, 
+                        phone: pPhone, 
+                        email: pEmail, 
+                        dob: pDOB,
+                        password: pId       // وضع رقم الهوية ككلمة مرور افتراضية لحساب المريض
+                    })
+                });
+                
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    alert(currentLang === 'ar' ? `🎉 ${data.message}` : '🎉 New patient registered successfully!');
+                    document.getElementById('signUpForm').reset();
+                    
+                    // التبديل التلقائي لتبويب المريض المسجل وتعبئة رقم الهوية للبدء بالفحص مباشرة
+                    tabExisting.click();
+                    patientSearchInput.value = pId;
+                    searchPatient(pId);
+                } else {
+                    // هنا تظهر رسالة السيرفر المخصصة (مثل: الهوية مسجلة بالفعل)
+                    alert(`❌ ${data.message || (currentLang === 'ar' ? 'حدث خطأ أثناء الإضافة' : 'Error adding patient')}`);
+                }
+            } catch (err) {
+                console.error("Fetch Error:", err);
+                alert(currentLang === 'ar' ? '❌ فشل الاتصال بالسيرفر، تأكد من تشغيل الفلاسك في الـ Terminal.' : '❌ Error connecting to server.');
+            }
+        }
+        // دالة الضغط على بدء معالجة الفحص والتحليل
+async function processAndAnalyze() {
+    if (!selectedPatientId) {
+        alert(currentLang === 'ar' ? 'الرجاء اختيار أو البحث عن مريض أولاً!' : 'Please select or search for a patient first!');
+        return;
+    }
+    if (fileInput.files.length === 0) {
+        alert(currentLang === 'ar' ? 'الرجاء إدخال أو رفع ملف الأشعة (X-Ray) للمريض!' : 'Please upload an X-Ray file for the patient!');
+        return;
+    }
+
+    const processBtn = document.getElementById('processBtn');
+    processBtn.disabled = true;
+    processBtn.innerText = currentLang === 'ar' ? 'جاري التحليل...' : 'Analyzing...';
+
+    const formData = new FormData();
+    formData.append('image', fileInput.files[0]);
+    formData.append('patient_id', selectedPatientId);
+
+    const token = sessionStorage.getItem('auth_token');
+
+    try {
+        const response = await fetch('/api/new-scan', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token },
+            body: formData
+        });
+        const data = await response.json();
+
+        if (data.success) {
+            sessionStorage.setItem('current_view_scan_id', data.scan_id);
+            window.location.href = 'views.html';
+        } else {
+            alert('❌ ' + (data.message || 'حدث خطأ أثناء التحليل'));
+            processBtn.disabled = false;
+            processBtn.innerText = currentLang === 'ar' ? 'بدء تحليل الفحص' : 'Process & Analyze Scan';
+        }
+    } catch (err) {
+        console.error(err);
+        alert(currentLang === 'ar' ? 'فشل الاتصال بالسيرفر' : 'Failed to connect to server');
+        processBtn.disabled = false;
+        processBtn.innerText = currentLang === 'ar' ? 'بدء تحليل الفحص' : 'Process & Analyze Scan';
+    }
+}
+
+        // إعدادات التبويبات
+        tabExisting.addEventListener('click', () => {
+            tabExisting.className = "py-2.5 px-5 text-xs font-black uppercase tracking-wider border-b-2 border-emerald-500 text-emerald-500 focus:outline-none transition-all";
+            tabNew.className = "py-2.5 px-5 text-xs font-black uppercase tracking-wider border-b-2 border-transparent text-gray-400 hover:text-emerald-500 focus:outline-none transition-all";
+            existingPatientForm.classList.remove('hidden'); existingPatientForm.classList.add('block');
+            newPatientForm.classList.remove('block'); newPatientForm.classList.add('hidden');
+            uploadAndProcessSection.classList.remove('hidden'); uploadAndProcessSection.classList.add('block');
+        });
+
+        tabNew.addEventListener('click', () => {
+            tabNew.className = "py-2.5 px-5 text-xs font-black uppercase tracking-wider border-b-2 border-emerald-500 text-emerald-500 focus:outline-none transition-all";
+            tabExisting.className = "py-2.5 px-5 text-xs font-black uppercase tracking-wider border-b-2 border-transparent text-gray-400 hover:text-emerald-500 focus:outline-none transition-all";
+            newPatientForm.classList.remove('hidden'); newPatientForm.classList.add('block');
+            existingPatientForm.classList.remove('block'); existingPatientForm.classList.add('hidden');
+            uploadAndProcessSection.classList.remove('block'); uploadAndProcessSection.classList.add('hidden');
+        });
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                body.classList.add('dark-mode'); mainHtml.classList.add('dark');
+                if (modeIcon) { modeIcon.className = "fas fa-sun text-lg"; }
+            } else {
+                body.classList.remove('dark-mode'); mainHtml.classList.remove('dark');
+                if (modeIcon) { modeIcon.className = "fas fa-moon text-lg"; }
+            }
+            localStorage.setItem('theme', theme);
+        }
+
+        function updateLanguage(lang) {
+            mainHtml.setAttribute('lang', lang);
+            mainHtml.setAttribute('dir', 'ltr');
+
+            if (patientSearchInput) { patientSearchInput.placeholder = lang === 'ar' ? 'أدخل رقم الهوية (مثال: A1102)' : 'Enter ID (e.g., A1102)'; }
+            if (newPatientIdInput) { newPatientIdInput.placeholder = lang === 'ar' ? 'مثال: A1102' : 'Ex: A1102'; }
+
+            document.querySelectorAll('.lang-txt').forEach(el => {
+                const translatedText = el.getAttribute(`data-${lang}`);
+                if (translatedText) { el.innerText = translatedText; }
+            });
+            localStorage.setItem('lang', lang);
+        }
+
+        applyTheme(currentTheme);
+        updateLanguage(currentLang);
+
+        modeToggle.addEventListener('click', () => {
+            currentTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
+            applyTheme(currentTheme);
+        });
+
+        langBtn.addEventListener('click', () => {
+            currentLang = (currentLang === 'en') ? 'ar' : 'en';
+            updateLanguage(currentLang);
+        });
+
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const uploadTitle = document.getElementById('uploadTitle');
+        const uploadSub = document.getElementById('uploadSub');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => { handleFiles(e.target.files); });
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => { dropZone.addEventListener(eventName, preventDefaults, false); });
+        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+        ['dragenter', 'dragover'].forEach(eventName => { dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false); });
+        ['dragleave', 'drop'].forEach(eventName => { dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false); });
+        dropZone.addEventListener('drop', (e) => { handleFiles(e.dataTransfer.files); });
+
+        function handleFiles(files) {
+            if (files.length > 0) {
+                const file = files[0];
+                uploadTitle.innerText = file.name;
+                const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                uploadSub.innerText = currentLang === 'ar' ? `الحجم: ${fileSizeMB} ميجابايت - جاهز للمعالجة` : `Size: ${fileSizeMB} MB - Ready to process`;
+            }
+        }
+    </script>
+</body>
+</html>
