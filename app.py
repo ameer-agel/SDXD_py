@@ -21,12 +21,32 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Monkey-patch gradio_client to support Gradio 5+ space info routing and JSON Schema boolean types
 import gradio_client
+import gradio_client.client
+import gradio_client.utils
+
 gradio_client.utils.RAW_API_INFO_URL = "gradio_api/info?serialize=False"
+if hasattr(gradio_client.client, "utils"):
+    gradio_client.client.utils.RAW_API_INFO_URL = "gradio_api/info?serialize=False"
+
 _orig_schema_to_type = gradio_client.utils._json_schema_to_python_type
 gradio_client.utils._json_schema_to_python_type = lambda s, d: "Any" if isinstance(s, bool) else _orig_schema_to_type(s, d)
 
 HF_SPACE = "samarfuoad/modelProject"
-hf_client = Client(HF_SPACE)
+print("DEBUG: RAW_API_INFO_URL in utils:", gradio_client.utils.RAW_API_INFO_URL)
+try:
+    hf_client = Client(HF_SPACE)
+except Exception as e:
+    print("DEBUG: Client initialization failed!")
+    print("DEBUG: Exception:", e)
+    print("DEBUG: RAW_API_INFO_URL on failure:", gradio_client.utils.RAW_API_INFO_URL)
+    import httpx
+    try:
+        r = httpx.get("https://samarfuoad-modelproject.hf.space/gradio_api/info?serialize=False")
+        print("DEBUG: Direct httpx fetch status:", r.status_code)
+        print("DEBUG: Direct httpx fetch text:", r.text[:500])
+    except Exception as fetch_err:
+        print("DEBUG: Direct httpx fetch failed:", fetch_err)
+    raise e
 
 # ************************************************************
 # دالة الاتصال بقاعدة البيانات
