@@ -258,105 +258,113 @@ def uploaded_file(filename):
     return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
 
 # ************************************************************
+# ************************************************************
 # دالة تسجيل الدخول (مريض / طبيب / مدير)
 # ************************************************************
 @app.route('/login', methods=['POST'])
 def login():
-    data = request.get_json()
-    if not data or 'loginId' not in data or 'password' not in data:
-        return jsonify({"success": False, "message": "بيانات الدخول غير مكتملة"}), 400
-
-    login_id = str(data['loginId']).strip()
-    password = str(data['password']).strip()
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    import traceback
     try:
-        cursor.execute("SELECT * FROM patients WHERE PatientId = %s", (login_id,))
-        patient = cursor.fetchone()
+        data = request.get_json()
+        if not data or 'loginId' not in data or 'password' not in data:
+            return jsonify({"success": False, "message": "بيانات الدخول غير مكتملة"}), 400
 
-        if patient:
-            stored = patient.get('password_hash') or ''
-            password_ok = False
-            if stored.startswith('scrypt:') or stored.startswith('pbkdf2:'):
-                from werkzeug.security import check_password_hash
-                try:
-                    password_ok = check_password_hash(stored, password)
-                except Exception:
-                    password_ok = False
-            else:
-                password_ok = (stored == password)
+        login_id = str(data['loginId']).strip()
+        password = str(data['password']).strip()
 
-            if password_ok:
-                token = jwt.encode({
-                    'user_id': patient['PatientId'],
-                    'role': 'patient',
-                    'name': patient.get('full_name', ''),
-                    'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)
-                }, app.config['SECRET_KEY'], algorithm='HS256')
-                return jsonify({
-                    "success": True, "role": "patient",
-                    "token": token,
-                    "name": patient.get('full_name', ''),
-                    "message": "تم تسجيل الدخول بنجاح"
-                })
-            else:
-                return jsonify({"success": False, "message": "كلمة المرور أو بيانات الدخول خاطئة"}), 401
-        
+        print(f"DEBUG: Login attempt for loginId={login_id}", flush=True)
 
-        doctor_id_part = login_id[1:]
-        cursor.execute("SELECT * FROM doctors WHERE idDoctor = %s AND password_hash = %s",(doctor_id_part, password))
-        doctor = cursor.fetchone()
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("SELECT * FROM patients WHERE PatientId = %s", (login_id,))
+            patient = cursor.fetchone()
 
-        if doctor:
-            expected = doctor['first_name'].strip()[0].lower() + str(doctor['idDoctor'])
-            if login_id.lower() == expected.lower():
-                token = jwt.encode({
-                    'user_id':  doctor['idDoctor'],
-                    'role':     'doctor',
-                    'name':     f"{doctor['first_name'].strip()} {doctor['last_name']}",
-                    'exp':      datetime.datetime.utcnow() + datetime.timedelta(days=7)
-                }, app.config['SECRET_KEY'], algorithm='HS256')
-                return jsonify({
-                    "success": True, "role": "doctor",
-                    "token": token,
-                    "name": f"{doctor['first_name'].strip()} {doctor['last_name']}",
-                    "message": "تم تسجيل الدخول بنجاح"
-                })
-        cursor.execute("SELECT * FROM admins WHERE username = %s", (login_id,))
-        admin = cursor.fetchone()
+            if patient:
+                stored = patient.get('password_hash') or ''
+                password_ok = False
+                if stored.startswith('scrypt:') or stored.startswith('pbkdf2:'):
+                    from werkzeug.security import check_password_hash
+                    try:
+                        password_ok = check_password_hash(stored, password)
+                    except Exception:
+                        password_ok = False
+                else:
+                    password_ok = (stored == password)
 
-        if admin:
-            stored = admin['password'] if admin['password'] else ""
+                if password_ok:
+                    token = jwt.encode({
+                        'user_id': patient['PatientId'],
+                        'role': 'patient',
+                        'name': patient.get('full_name', ''),
+                        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)
+                    }, app.config['SECRET_KEY'], algorithm='HS256')
+                    return jsonify({
+                        "success": True, "role": "patient",
+                        "token": token,
+                        "name": patient.get('full_name', ''),
+                        "message": "تم تسجيل الدخول بنجاح"
+                    })
+                else:
+                    return jsonify({"success": False, "message": "كلمة المرور أو بيانات الدخول خاطئة"}), 401
+            
 
-            if stored.startswith("scrypt:") or stored.startswith("pbkdf2:"):
-               try:
-                   password_ok = check_password_hash(stored, password)
-               except Exception:
-                  password_ok = False
-            else:
-                password_ok = (stored == password)
+            doctor_id_part = login_id[1:]
+            cursor.execute("SELECT * FROM doctors WHERE idDoctor = %s AND password_hash = %s",(doctor_id_part, password))
+            doctor = cursor.fetchone()
 
-            if password_ok:
-                token = jwt.encode({
-                    'user_id': admin['username'],
-                    'role': 'admin',
-                    'name': admin.get('full_name', ''),
-                    'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)
-                }, app.config['SECRET_KEY'], algorithm='HS256')
-                return jsonify({
-                    "success": True, "role": "admin",
-                    "token": token,
-                    "name": admin.get('full_name', ''),
-                    "message": "تم تسجيل الدخول بنجاح"
-                })
+            if doctor:
+                expected = doctor['first_name'].strip()[0].lower() + str(doctor['idDoctor'])
+                if login_id.lower() == expected.lower():
+                    token = jwt.encode({
+                        'user_id':  doctor['idDoctor'],
+                        'role':     'doctor',
+                        'name':     f"{doctor['first_name'].strip()} {doctor['last_name']}",
+                        'exp':      datetime.datetime.utcnow() + datetime.timedelta(days=7)
+                    }, app.config['SECRET_KEY'], algorithm='HS256')
+                    return jsonify({
+                        "success": True, "role": "doctor",
+                        "token": token,
+                        "name": f"{doctor['first_name'].strip()} {doctor['last_name']}",
+                        "message": "تم تسجيل الدخول بنجاح"
+                    })
 
-        return jsonify({"success": False, "message": "كلمة المرور أو بيانات الدخول خاطئة"}), 401
+            cursor.execute("SELECT * FROM admins WHERE username = %s", (login_id,))
+            admin = cursor.fetchone()
+
+            if admin:
+                stored = admin['password'] if admin['password'] else ""
+
+                if stored.startswith("scrypt:") or stored.startswith("pbkdf2:"):
+                   try:
+                       password_ok = check_password_hash(stored, password)
+                   except Exception:
+                      password_ok = False
+                else:
+                    password_ok = (stored == password)
+
+                if password_ok:
+                    token = jwt.encode({
+                        'user_id': admin['username'],
+                        'role': 'admin',
+                        'name': admin.get('full_name', ''),
+                        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)
+                    }, app.config['SECRET_KEY'], algorithm='HS256')
+                    return jsonify({
+                        "success": True, "role": "admin",
+                        "token": token,
+                        "name": admin.get('full_name', ''),
+                        "message": "تم تسجيل الدخول بنجاح"
+                    })
+
+            return jsonify({"success": False, "message": "كلمة المرور أو بيانات الدخول خاطئة"}), 401
+
+        finally:
+            cursor.close(); conn.close()
 
     except Exception as e:
+        traceback.print_exc()
         return jsonify({"success": False, "message": f"خطأ في الخادم: {str(e)}"}), 500
-    finally:
-        cursor.close(); conn.close()
 
 # ************************************************************
 # دالة جلب بيانات الطبيب الأساسية (الاسم + الصورة)
